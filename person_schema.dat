@@ -1,0 +1,11 @@
+{
+  "version":"0.1",
+  "fields":[
+    {"fieldName": "pname", "fieldType":"String"},
+    {"fieldName": "age","fieldType": "int" },
+    {"fieldName": "address", "fieldType":"String"},
+    {"fieldName": "carplatenumber", "fieldType":"String"},
+    {"fieldName": "description", "fieldType":"String"}
+  ],
+   "indexBy":"pname"
+}

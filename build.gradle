@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'pmd'
+    id 'findbugs'
+}
+
+group 'com.mixer'
+version '1.0-SNAPSHOT'
+pmd {
+  toolVersion = '4.3'
+}
+sourceCompatibility = 1.8
+jacoco {
+    toolVersion = "0.8.2"
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    compile 'io.javalin:javalin:2.4.0'
+    compile 'org.slf4j:slf4j-simple:1.7.25'
+    compile "com.fasterxml.jackson.core:jackson-databind:2.9.6"
+}
+
+sourceSets {
+    test{
+        java {
+            srcDirs = ["src/test/java"]
+        }
+    }
+}
+
+jacocoTestReport {
+    group = "Report"
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.enabled true
+    }
+}
+findbugs {
+    ignoreFailures = false
+    toolVersion = "3.0.1"
+    sourceSets=[sourceSets.main]
+    reportsDir = file("$project.buildDir/reports/findbugs")
+    effort = "max"
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+        //html.stylesheet = resources.text.fromFile("config/xsl/checkstyle-custom.xsl")
+    }
+}
+pmd {
+  pmdTest.enabled=false
+  ignoreFailures = true
+  sourceSets = [sourceSets.main]
+  reportsDir = file("$project.buildDir/reports/pmd")
+  ruleSets = [
+    "java-basic",
+    "java-braces"
+  ]
+}

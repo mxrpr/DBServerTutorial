@@ -1,0 +1,10 @@
+{
+  "version":"0.1",
+  "fields":[
+    {"fieldName": "pname", "fieldType":"String"},
+    {"fieldName": "age","fieldType": "int" },
+    {"fieldName": "owner", "fieldType":"String"}
+  ],
+
+  "indexBy": "pname"
+}
