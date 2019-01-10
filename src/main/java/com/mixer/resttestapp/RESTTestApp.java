@@ -82,7 +82,7 @@ public final class RESTTestApp {
         };
 
         executorService.submit(searchThread);
-        executorService.submit(listAllRecordsThread);
+//        executorService.submit(listAllRecordsThread);
         executorService.submit(addPerson);
 
         try {
@@ -137,7 +137,7 @@ public final class RESTTestApp {
 
     private void performSearchTest() throws IOException {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("name", "test24");
+        parameters.put("name", "test1");
 
         this.doRequest("searchlevenshtein", parameters);
     }

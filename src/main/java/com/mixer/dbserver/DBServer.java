@@ -28,7 +28,7 @@ public final class DBServer implements DB {
     private FileHandler fileHandler;
     private Map<Long, ITransaction> transactions;
 
-    private final Logger LOGGER = Logger.getLogger("DBServer");
+    public static final Logger LOGGER = Logger.getLogger("DBServer");
     private static final String PROPERTY_FILE_NAME = "config.properties";
     private static final String LOG_LEVEL = "LOG_LEVEL";
 
@@ -70,7 +70,7 @@ public final class DBServer implements DB {
 
     @Override
     public void add(Person person) throws IOException, DuplicateNameException {
-        LOGGER.info("[" + this.getClass().getName() + "]" +"Adding person : " + person);
+        LOGGER.info("[DBServer] Adding person : " + person);
         OperationUnit ou = this.fileHandler.add(person.pname, person.age, person.address, person.carplatenumber,
                 person.description);
         this.getTransaction().registerAdd(ou.addedRowPosition);
@@ -79,17 +79,17 @@ public final class DBServer implements DB {
     @Override
     public void delete(long rowNumber) throws IOException {
         if (rowNumber < 0) {
-            LOGGER.info("[" + this.getClass().getName() + "]" + "Row Number is less then 0:  " + rowNumber);
+            LOGGER.info("[DBServer] Row Number is less then 0:  " + rowNumber);
             throw new IOException("Row Number is less then 0");
         }
-        LOGGER.info("[" + this.getClass().getName() + "]" + "Delete person with rowNumber: " + rowNumber);
+        LOGGER.info("[DBServer] Delete person with rowNumber: " + rowNumber);
         OperationUnit ou = this.fileHandler.deleteRow(rowNumber);
         this.getTransaction().registerDelete(ou.deletedRowPosition);
     }
 
     @Override
     public void update(long rowNumber, final Person person) throws IOException, DuplicateNameException {
-        LOGGER.info("[" + this.getClass().getName() + "]" + "updateing person. Row number " + rowNumber + " person: " + person);
+        LOGGER.info("[DBServer] updating person. Row number " + rowNumber + " person: " + person);
         OperationUnit operationUnit = this.fileHandler.update(rowNumber, person.pname, person.age, person.address,
                 person.carplatenumber, person.description);
         ITransaction transaction = this.getTransaction();
@@ -99,7 +99,7 @@ public final class DBServer implements DB {
 
     @Override
     public void update(String name, Person person) throws IOException, DuplicateNameException {
-        LOGGER.info("[" + this.getClass().getName() + "]" + "updateing person. Name: " + name + " person: " + person);
+        LOGGER.info("[[DBServer] updating person. Name: " + name + " person: " + person);
         OperationUnit operationUnit = this.fileHandler.update(name, person.pname, person.age, person.address,
                 person.carplatenumber,
                 person.description);
@@ -111,7 +111,7 @@ public final class DBServer implements DB {
 
     @Override
     public Person read(long rowNumber) throws IOException {
-        LOGGER.info("[" + this.getClass().getName() + "]" + "Reading row:" + rowNumber);
+        LOGGER.info("[DBServer] Reading row:" + rowNumber);
         Person person = this.fileHandler.readRow(rowNumber);
         this.logInfoPerson(person);
 
@@ -120,7 +120,7 @@ public final class DBServer implements DB {
 
     @Override
     public Person search(String name) throws IOException {
-        LOGGER.info("[" + this.getClass().getName() + "]" + "Searching for person: " + name);
+        LOGGER.info("[DBServer] Searching for person: " + name);
         final Person person =  this.fileHandler.search(name);
         this.logInfoPerson(person);
 
@@ -129,7 +129,7 @@ public final class DBServer implements DB {
 
     @Override
     public List<Person> searchWithLeveinshtein(String name, int tolerance) throws IOException {
-        LOGGER.info("[" + this.getClass().getName() + "]" + "Search with Leveinshtein " + name + " tolerance:" + tolerance);
+        LOGGER.info("[DBServer] Search with Leveinshtein " + name + " tolerance:" + tolerance);
         final List<Person> persons =  this.fileHandler.searchWithLeveinshtein(name, tolerance);
         this.logInfoPersonList(persons);
 
@@ -138,7 +138,7 @@ public final class DBServer implements DB {
 
     @Override
     public List<Person> searchWithRegexp(String regexp) throws IOException {
-        LOGGER.info("[" + this.getClass().getName() + "]" + "Search with regexp " + regexp);
+        LOGGER.info("[DBServer] Search with regexp " + regexp);
         final List<Person> persons = this.fileHandler.searchWithRegexp(regexp);
         this.logInfoPersonList(persons);
 
@@ -147,7 +147,7 @@ public final class DBServer implements DB {
 
     private ITransaction getTransaction() {
         long threadID = Thread.currentThread().getId();
-        LOGGER.info("[" + this.getClass().getName() + "]" + "Get transaction with id: " + threadID);
+        LOGGER.info("[DBServer] Get transaction with id: " + threadID);
         return this.transactions.getOrDefault(threadID, null);
     }
 
@@ -166,14 +166,14 @@ public final class DBServer implements DB {
     public void commit() throws IOException {
         ITransaction transaction = this.getTransaction();
         if (transaction == null) {//write out error in logs
-            LOGGER.info("[" + this.getClass().getName() + "]" + "transaction was not found!!");
+            LOGGER.info("[DBServer] transaction was not found!!");
             return;
         }
 
         this.fileHandler.commit(transaction.getNewRows(), transaction.getDeletedRows());
         this.transactions.remove(Thread.currentThread().getId());
         transaction.clear();
-        LOGGER.info("[" + this.getClass().getName() + "]" + " Commit DONE (" + transaction.getUid() + ")");
+        LOGGER.info("[DBServer]  Commit DONE (" + transaction.getUid() + ")");
     }
 
     @Override
@@ -185,7 +185,7 @@ public final class DBServer implements DB {
         this.fileHandler.rollback(transaction.getNewRows(), transaction.getDeletedRows());
         this.transactions.remove(Thread.currentThread().getId());
         transaction.clear();
-        LOGGER.info("[" + this.getClass().getName() + "]" + " Rollback DONE (" + transaction.getUid() + ")");
+        LOGGER.info("[DBServer] Rollback DONE (" + transaction.getUid() + ")");
     }
 
     public List<DebugRowInfo> listAllRowsWithDebug() throws IOException {
@@ -193,7 +193,7 @@ public final class DBServer implements DB {
     }
 
     public void defragmentDatabase() throws IOException, DuplicateNameException {
-        LOGGER.info("[" + this.getClass().getName() + "]" + "Defragmenting database");
+        LOGGER.info("[DBServer] Defragmenting database");
         File tmpFile = File.createTempFile("defrag", "dat");
         Index.getInstance().clear();
 
@@ -215,7 +215,7 @@ public final class DBServer implements DB {
         boolean wasDeleted = this.fileHandler.deleteFile();
         if (!wasDeleted) {
             tmpFile.delete();
-            LOGGER.severe("[" + this.getClass().getName() + "]" + "Database file cannot be deleted during the defragmantation");
+            LOGGER.severe("[DBServer] Database file cannot be deleted during the defragmantation");
             this.initialise();
             throw new IOException("DB cannot be defragmented. Check the logs.");
         }
@@ -234,7 +234,7 @@ public final class DBServer implements DB {
 
         // reinitialise the Index
         this.initialise();
-        LOGGER.info("[" + this.getClass().getName() + "]" + "Database file has been defragmented");
+        LOGGER.info("[DBServer] Database file has been defragmented");
     }
 
     private void logInfoPerson(final Person person) {
@@ -249,7 +249,7 @@ public final class DBServer implements DB {
             sb.append(System.getProperty("line.separator"));
         }
 
-        LOGGER.info("[" + this.getClass().getName() + "]" + "Read persons: " + sb);
+        LOGGER.info("[DBServer] Read persons: " + sb);
     }
 
     @Override

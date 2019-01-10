@@ -26,6 +26,7 @@ public class TestApp {
     private void performTest() {
         try {
             deleteDatabase();
+            fillDB(200);
 //            fragmentDatabase();
             addPersonWithTransaction();
 //            removePersonWithTransaction();
@@ -104,11 +105,10 @@ public class TestApp {
 
     void addPersonWithTransaction() throws IOException, DuplicateNameException {
         try (DBServer db = new DBServer(dbFile)) {
-            ITransaction transaction = db.beginTransaction(); //  begin transaction
-            Person p = new Person("John", 44, "Berlin", "www-404", "This is a description");
+            db.beginTransaction();
+            Person p = new Person("John", 444, "Berlin", "www-404", "This is a description");
             db.add(p);
-            db.commit(); // db.rollback()
-//            db.rollback();
+            db.commit();
         }
     }
 
@@ -195,8 +195,10 @@ public class TestApp {
 
         try (DB db = new DBServer(dbFile)) {
             for (int i = 0; i < rowNumber; i++) {
+                db.beginTransaction();
                 Person p = new Person("John" + i, 44, "Berlin", "www-404", "This is a description");
                 db.add(p);
+                db.commit();
             }
         }
     }

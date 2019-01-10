@@ -1,6 +1,7 @@
 package com.mixer.raw.general;
 
-import com.mixer.dbserver.DB;
+
+import com.mixer.dbserver.DBServer;
 import com.mixer.exceptions.DBException;
 import com.mixer.exceptions.DuplicateNameException;
 import com.mixer.util.Leveinshtein;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 public class GenericFileHandler extends GenericBaseFileHandler {
 
+
     public GenericFileHandler(final String dbFileName) throws FileNotFoundException {
         super(dbFileName);
     }
@@ -24,8 +26,10 @@ public class GenericFileHandler extends GenericBaseFileHandler {
 
 
     public OperationUnit add(final Object object, boolean defragOperation) throws DuplicateNameException, DBException {
-        writeLock.lock();
+
+
         OperationUnit ou = new OperationUnit();
+        writeLock.lock();
         try {
             String _indexBy = this.schema.indexBy;
             if (_indexBy == null) {
@@ -54,21 +58,16 @@ public class GenericFileHandler extends GenericBaseFileHandler {
             // description length : int
             // description
 
-            // calculate record length
             int recordLength = 0;
-
             for (Field field : this.schema.fields) {
                 recordLength += getFieldLengthByType(field, object);
             }
-
             // is temporary
             if (defragOperation) {
                 this.dbFile.writeBoolean(false);
-            }
-            else {
+            } else {
                 this.dbFile.writeBoolean(true);
             }
-
 
 
             // it is deleted
@@ -95,6 +94,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
 
 
             ou.addedRowPosition = currentPositionToInsert;
+            DBServer.LOGGER.info("[GenericFileHandler] Add person, position " + currentPositionToInsert);
 
             return ou;
 
@@ -106,34 +106,9 @@ public class GenericFileHandler extends GenericBaseFileHandler {
         }
     }
 
-    private int getFieldLengthByType(Field field, Object object) throws NoSuchFieldException, IllegalAccessException {
-        int result = 0;
-
-        switch (field.fieldType) {
-            case "String": {
-                Object value = object.getClass().getDeclaredField(field.fieldName).get(object);
-                result += ((String) value).length();
-                result += 4;
-                break;
-            }
-            case "int": {
-                result = 4;
-                break;
-            }
-            case "long": {
-                result += 4;
-                break;
-            }
-            default: {
-                throw new NoSuchFieldException(field.fieldType);
-            }
-            // TODO add more types
-        }
-
-        return result;
-    }
 
     public Object readRow(long rowNumber) throws DBException {
+        DBServer.LOGGER.info("[GenericFileHandler] Read row: " + rowNumber);
         readLock.lock();
         try {
             long bytePosition = GenericIndex.getInstance().getBytePosition(rowNumber);
@@ -145,8 +120,10 @@ public class GenericFileHandler extends GenericBaseFileHandler {
 
             DataInputStream stream = new DataInputStream(new ByteArrayInputStream(row));
 
+            DBServer.LOGGER.info("[GenericFileHandler] Read done");
+
             return this.readFromByteStream(stream, this.zclass);
-        }catch(IOException ioe) {
+        } catch (IOException ioe) {
             throw new DBException(ioe.getMessage());
         } finally {
             readLock.unlock();
@@ -155,6 +132,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
 
 
     public OperationUnit deleteRow(long rowNumber) throws DBException {
+        DBServer.LOGGER.info("[GenericFileHandler] Delete row: " + rowNumber);
         writeLock.lock();
         try {
             long bytePositionOfRecord = GenericIndex.getInstance().getBytePosition(rowNumber);
@@ -172,9 +150,9 @@ public class GenericFileHandler extends GenericBaseFileHandler {
             GenericIndex.getInstance().remove(rowNumber);
             OperationUnit ou = new OperationUnit();
             ou.deletedRowPosition = bytePositionOfRecord;
-
+            DBServer.LOGGER.info("[GenericFileHandler] Row deleted ");
             return ou;
-        }catch(IOException ioe) {
+        } catch (IOException ioe) {
             throw new DBException(ioe.getMessage());
         } finally {
             writeLock.unlock();
@@ -182,6 +160,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
     }
 
     public OperationUnit update(long rowNumber, final Object object) throws DuplicateNameException, DBException {
+        DBServer.LOGGER.info("[GenericFileHandler] Update row: " + rowNumber);
         writeLock.lock();
         try {
             OperationUnit deleteoperation = this.deleteRow(rowNumber);
@@ -191,6 +170,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
             operation.addedRowPosition = addoperation.addedRowPosition;
             operation.succesfullOperation = true;
 
+            DBServer.LOGGER.info("[GenericFileHandler] Update row done");
             return operation;
 
         } finally {
@@ -200,18 +180,23 @@ public class GenericFileHandler extends GenericBaseFileHandler {
 
     public OperationUnit update(final String indexedFieldName, final Object object) throws
             DuplicateNameException, DBException {
+        DBServer.LOGGER.info("[GenericFileHandler] Update row: " + indexedFieldName);
         writeLock.lock();
         try {
             long rowNumber = GenericIndex.getInstance().getRowNumberByIndex(indexedFieldName);
-            if (rowNumber == -1)
+            if (rowNumber == -1) {
                 return new OperationUnit();
+            }
+
             return this.update(rowNumber, object);
         } finally {
             writeLock.unlock();
+            DBServer.LOGGER.info("[GenericFileHandler] Update row done");
         }
     }
 
     public Object search(String name) throws DBException {
+        DBServer.LOGGER.info("[GenericFileHandler] Search by name: " + name);
         long rowNumber = GenericIndex.getInstance().getRowNumberByIndex(name);
         if (rowNumber == -1)
             return null;
@@ -240,6 +225,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
     }
 
     public List<Object> searchWithRegexp(String regexp) throws DBException {
+        DBServer.LOGGER.info("[GenericFileHandler] Search with regexp");
         List<Object> result = new ArrayList<>();
 
         Set<String> names = GenericIndex.getInstance().getIndexedValues();
@@ -256,6 +242,8 @@ public class GenericFileHandler extends GenericBaseFileHandler {
                 result.add(p);
             }
         }
+
+        DBServer.LOGGER.info("[GenericFileHandler] Search with regexp, done");
 
         return result;
     }

@@ -1,5 +1,6 @@
 package com.mixer.raw.general;
 
+import com.mixer.dbserver.DBServer;
 import com.mixer.exceptions.DBException;
 import com.mixer.util.DebugRowInfo;
 import kotlin.text.Charsets;
@@ -14,6 +15,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class GenericBaseFileHandler {
+
     RandomAccessFile dbFile;
     private final String dbFileName;
     protected Schema schema;
@@ -36,12 +38,14 @@ public class GenericBaseFileHandler {
     }
 
     public void initialise() throws IOException {
+        DBServer.LOGGER.info("[GenericBaseFileHandler] Initialise");
         if (this.dbFile.length() == 0) {
             this.setDBVersion();
         } else {
             String dbVersion = this.getDBVersion();
             System.out.println("DB version: " + dbVersion);
         }
+        DBServer.LOGGER.info("[GenericBaseFileHandler] Initialisation done");
     }
 
     public void setSchema(final Schema schema) {
@@ -54,16 +58,14 @@ public class GenericBaseFileHandler {
 
 
     public void loadAllDataToIndex(final Class zclass) throws DBException {
+        DBServer.LOGGER.info("[GenericBaseFileHandler] Loading index data");
+        long currentPos = HEADER_INFO_SPACE;
+        long rowNum = 0;
+        long deletedRows = 0;
+        long temporaryRows = 0;
+
         readLock.lock();
         try {
-            if (this.dbFile.length() == 0)
-                return;
-
-            long currentPos = HEADER_INFO_SPACE;
-            long rowNum = 0;
-            long deletedRows = 0;
-            long temporaryRows = 0;
-
             synchronized (this) {
                 while (currentPos < this.dbFile.length()) {
                     this.dbFile.seek(currentPos);
@@ -76,7 +78,7 @@ public class GenericBaseFileHandler {
                     boolean isDeleted = this.dbFile.readBoolean();
 
                     if (!isDeleted) {
-                        GenericIndex.getInstance().add(currentPos-1);
+                        GenericIndex.getInstance().add(currentPos - 1);
                     } else
                         deletedRows++;
 
@@ -92,7 +94,7 @@ public class GenericBaseFileHandler {
                         Object object = this.readFromByteStream(new DataInputStream(new ByteArrayInputStream(b)),
                                 zclass);
 
-                        String _name = (String)object.getClass().getDeclaredField(this.schema.indexBy).get(object);
+                        String _name = (String) object.getClass().getDeclaredField(this.schema.indexBy).get(object);
                         GenericIndex.getInstance().addIndexedValue(_name, rowNum);
                         rowNum++;
                     }
@@ -109,13 +111,14 @@ public class GenericBaseFileHandler {
             throw new DBException(e.getMessage());
         } finally {
             readLock.unlock();
+            DBServer.LOGGER.info("[GenericBaseFileHandler] Loading index data, done");
         }
     }
 
     Object readFromByteStream(final DataInputStream stream, final Class zclass) throws IOException {
         Object result;
         try {
-            result = Class.forName(zclass.getCanonicalName()).getDeclaredConstructor(new Class[] {}).newInstance();
+            result = Class.forName(zclass.getCanonicalName()).getDeclaredConstructor(new Class[]{}).newInstance();
 
             for (Field field : this.schema.fields) {
                 if (field.fieldType.equalsIgnoreCase("String")) {
@@ -125,8 +128,7 @@ public class GenericBaseFileHandler {
                     String value = new String(b, "UTF-8");
                     // set the field value to result object
                     result.getClass().getDeclaredField(field.fieldName).set(result, value);
-                }
-                else if (field.fieldType.equalsIgnoreCase("int")) {
+                } else if (field.fieldType.equalsIgnoreCase("int")) {
                     int value = stream.readInt();
                     // set the field value to result object
                     result.getClass().getDeclaredField(field.fieldName).set(result, value);
@@ -134,6 +136,7 @@ public class GenericBaseFileHandler {
                 // TODO implement other field types
             }
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchFieldException | NoSuchMethodException | InvocationTargetException e) {
+            e.printStackTrace();
             throw new IOException(e.getMessage());
         }
 
@@ -141,6 +144,7 @@ public class GenericBaseFileHandler {
     }
 
     byte[] readRawRecord(long bytePositionOfRow) throws IOException {
+        DBServer.LOGGER.info("[GenericBaseFileHandler] Read raw record, position: " + bytePositionOfRow);
         readLock.lock();
         try {
             synchronized (this) {
@@ -164,10 +168,12 @@ public class GenericBaseFileHandler {
 
         } finally {
             readLock.unlock();
+            DBServer.LOGGER.info("[GenericBaseFileHandler] Read raw record, position, Done ");
         }
     }
 
     public void close() throws IOException {
+        DBServer.LOGGER.info("[GenericBaseFileHandler] Closing");
         this.dbFile.close();
     }
 
@@ -231,6 +237,7 @@ public class GenericBaseFileHandler {
     }
 
     public void commit(List<Long> newRows, List<Long> deletedRows) throws DBException {
+        DBServer.LOGGER.info("[GenericBaseFileHandler] Commit");
         writeLock.lock();
         try {
             for (long position : newRows) {
@@ -242,7 +249,7 @@ public class GenericBaseFileHandler {
 
                 // add it to the index
 
-                String _name = (String)object.getClass().getDeclaredField(this.schema.indexBy).get(object);
+                String _name = (String) object.getClass().getDeclaredField(this.schema.indexBy).get(object);
                 GenericIndex.getInstance().addIndexedValue(_name, GenericIndex.getInstance().getTotalNumberOfRows());
                 GenericIndex.getInstance().add(position);
             }
@@ -257,10 +264,12 @@ public class GenericBaseFileHandler {
             throw new DBException(e.getMessage());
         } finally {
             writeLock.unlock();
+            DBServer.LOGGER.info("[GenericBaseFileHandler] Commit, Done");
         }
     }
 
     public void rollback(List<Long> newRows, List<Long> deletedRows) throws DBException {
+        DBServer.LOGGER.info("[GenericBaseFileHandler] Rollback");
         writeLock.lock();
         try {
             for (long position : newRows) {
@@ -288,18 +297,21 @@ public class GenericBaseFileHandler {
 
 
                 // add it to the index
-                String _name = (String)object.getClass().getDeclaredField("pname").get(object);
+                String _name = (String) object.getClass().getDeclaredField("pname").get(object);
                 GenericIndex.getInstance().addIndexedValue(_name, GenericIndex.getInstance().getTotalNumberOfRows());
                 GenericIndex.getInstance().add(position);
             }
-        } catch (IllegalAccessException|NoSuchFieldException | IOException e) {
+        } catch (IllegalAccessException | NoSuchFieldException | IOException e) {
+            e.printStackTrace();
             throw new DBException(e.getMessage());
         } finally {
             writeLock.unlock();
+            DBServer.LOGGER.info("[GenericBaseFileHandler] Rollback, Done");
         }
     }
 
     private void setDBVersion() throws IOException {
+        DBServer.LOGGER.info("[GenericBaseFileHandler] set DB version");
         this.dbFile.seek(0);
         String VERSION = "0.1";
         this.dbFile.write(VERSION.getBytes(Charsets.UTF_8));
@@ -319,5 +331,33 @@ public class GenericBaseFileHandler {
         } finally {
             readLock.unlock();
         }
+    }
+
+    protected int getFieldLengthByType(Field field, Object object) throws NoSuchFieldException, IllegalAccessException {
+        int result = 0;
+
+        switch (field.fieldType) {
+            case "String": {
+                Object value = object.getClass().getDeclaredField(field.fieldName).get(object);
+                result += ((String) value).length();
+                result += 4;
+                break;
+            }
+            case "int": {
+                result = 4;
+                break;
+            }
+            case "long": {
+                result += 4;
+                break;
+            }
+            default: {
+                DBServer.LOGGER.info("[GenericBaseFileHandler] No field was found : " + field.fieldType);
+                throw new NoSuchFieldException(field.fieldType);
+            }
+            // TODO add more types
+        }
+
+        return result;
     }
 }
