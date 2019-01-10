@@ -31,12 +31,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
         OperationUnit ou = new OperationUnit();
         writeLock.lock();
         try {
-            String _indexBy = this.schema.indexBy;
-            if (_indexBy == null) {
-                throw new DBException("indexBy is missing from the Schema");
-            }
-
-            String _name = (String)object.getClass().getDeclaredField(_indexBy).get(object);
+            String _name = (String) object.getClass().getDeclaredField(this.indexByFieldName).get(object);
 
             if (GenericIndex.getInstance().hasInIndex(_name)) {
                 throw new DuplicateNameException(String.format("Name '%s' already exists!", _name));

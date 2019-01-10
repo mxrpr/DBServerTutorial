@@ -20,6 +20,7 @@ public class GenericBaseFileHandler {
     private final String dbFileName;
     protected Schema schema;
     protected Class zclass;
+    protected String indexByFieldName;
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     final Lock readLock = readWriteLock.readLock();
@@ -48,8 +49,16 @@ public class GenericBaseFileHandler {
         DBServer.LOGGER.info("[GenericBaseFileHandler] Initialisation done");
     }
 
-    public void setSchema(final Schema schema) {
+    public void setSchema(final Schema schema) throws DBException {
+        DBServer.LOGGER.info("[GenericBaseFileHandler] Set schema");
         this.schema = schema;
+        if (this.indexByFieldName == null) {
+            this.indexByFieldName = this.schema.indexBy;
+            if (this.indexByFieldName == null) {
+                throw new DBException("indexBy is missing from the Schema");
+            }
+        }
+        DBServer.LOGGER.info("[GenericBaseFileHandler] Set schema, done");
     }
 
     public void setZClass(final Class zclass) {
