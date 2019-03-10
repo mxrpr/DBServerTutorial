@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class GenericIndex {
 
     private Schema schema;
-    private static GenericIndex index;
 
     // row number, byte position
     private final ConcurrentHashMap<Long, Long> rowIndex;
@@ -20,18 +19,14 @@ public final class GenericIndex {
 
     private long totalRowNumber = 0;
 
-    private GenericIndex() {
+    public GenericIndex(final Schema schema) throws DBException {
+        this.schema = schema;
+        String indexBy = this.schema.indexBy;
+        if (indexBy == null || indexBy.isEmpty()) {
+            throw new DBException("No index field was set in schema!");
+        }
         this.rowIndex = new ConcurrentHashMap<>();
         this.indexes = new ConcurrentHashMap<>();
-    }
-
-    public static GenericIndex getInstance() {
-        synchronized (GenericIndex.class) {
-            if (index == null) {
-                index = new GenericIndex();
-            }
-        }
-        return index;
     }
 
     public synchronized void add(long bytePosition) {
@@ -88,7 +83,7 @@ public final class GenericIndex {
         return _index.keySet();
     }
 
-    public synchronized void clear() {
+    public void clear() {
         this.totalRowNumber = 0;
         this.rowIndex.clear();
         this.indexes.clear();
@@ -103,11 +98,11 @@ public final class GenericIndex {
         }
     }
 
-    public void initialize(final Schema schema) throws DBException {
-        this.schema = schema;
-        String indexBy = this.schema.indexBy;
-        if (indexBy == null) {
-            throw new DBException("No indexBy field was set in schema!");
-        }
-    }
+//    public void initialize(final Schema schema) throws DBException {
+//        this.schema = schema;
+//        String indexBy = this.schema.indexBy;
+//        if (indexBy == null) {
+//            throw new DBException("No indexBy field was set in schema!");
+//        }
+//    }
 }

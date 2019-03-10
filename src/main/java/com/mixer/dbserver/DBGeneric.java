@@ -1,38 +1,28 @@
 package com.mixer.dbserver;
 
 import com.mixer.exceptions.DBException;
-import com.mixer.exceptions.DuplicateNameException;
-import com.mixer.transaction.ITransaction;
+import com.mixer.raw.general.Table;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.List;
 
 public interface DBGeneric extends Closeable {
 
-    void add(Object object) throws DuplicateNameException, DBException;
+    Table useTable(final String tableName,
+                   final String schema,
+                   final Class zclass) throws DBException;
 
-    void delete(long rowNumber) throws DBException;
+    boolean dropCurrentTable() throws DBException;
 
-    void update(long rowNumber, final Object object) throws  DuplicateNameException, DBException;
+    boolean dropTable(final String tableName) throws DBException;
 
-    void update(String indexedFieldName, final Object object) throws  DuplicateNameException, DBException;
+    boolean tableExists(final String tableName);
 
-    Object read(long rowNumber) throws DBException;
+    String exportTableToCSV(final String tableName, final String schema, final Class zclass ) throws DBException;
 
-    Object search(final String indexedFieldName) throws DBException;
+    String exportCurrentTableToSCV() throws DBException;
 
-    List<Object> searchWithLeveinshtein(final String indexedFieldName, int tolerance) throws DBException;
-
-    List<Object> searchWithRegexp(final String regexp) throws DBException;
-
-    ITransaction beginTransaction();
-
-    void commit() throws DBException;
-
-    void rollback() throws DBException;
-
-    long getTotalRecordNumber();
+    // List<String> getAvailableTables();
 
     void close() throws IOException;
 }

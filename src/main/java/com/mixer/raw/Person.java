@@ -1,9 +1,10 @@
 package com.mixer.raw;
 
 import com.google.gson.JsonObject;
+import com.mixer.raw.general.ICSVRepresentation;
 import com.mixer.util.JSONRep;
 
-public class Person implements JSONRep {
+public class Person implements JSONRep, ICSVRepresentation {
     public String pname;
     public int age;
     public String address;
@@ -44,5 +45,10 @@ public class Person implements JSONRep {
         json.addProperty("description", this.description);
 
         return json.toString();
+    }
+
+    @Override
+    public String toSCV() {
+        return String.format("%s, %d, %s, %s, %s", this.pname, this.age, this.address, this.carplatenumber, this.description);
     }
 }

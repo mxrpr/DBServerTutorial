@@ -2,6 +2,7 @@ import com.mixer.dbserver.*;
 import com.mixer.exceptions.DBException;
 import com.mixer.raw.Person;
 import com.mixer.raw.general.GenericIndex;
+import com.mixer.raw.general.Table;
 import com.mixer.util.DebugRowInfo;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,14 +50,15 @@ public class DBGenericTests {
             "}";
     @Test
     public void testAdd() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
             Dog dog = new Dog("King", 2, "John");
 
-            db.add(dog);
-            db.commit();
+            table.add(dog);
+            table.commit();
 
-            Assert.assertEquals(GenericIndex.getInstance().getTotalNumberOfRows(), 1);
+            Assert.assertEquals(table.getTotalRecordNumber(), 1);
 
         } catch (Exception e) {
             Assert.fail();
@@ -65,15 +67,16 @@ public class DBGenericTests {
 
     @Test
     public void testRead() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
             Dog dog = new Dog("King", 2, "John");
 
-            db.beginTransaction();
-            db.add(dog);
-            db.commit();
+            table.beginTransaction();
+            table.add(dog);
+            table.commit();
 
-            Assert.assertEquals(GenericIndex.getInstance().getTotalNumberOfRows(), 1);
-            Dog result = (Dog)db.read(0);
+            Assert.assertEquals(table.getTotalRecordNumber(), 1);
+            Dog result = (Dog)table.read(0);
             Assert.assertTrue(result.pname.equals("King"));
             Assert.assertTrue(result.age == 2 );
             Assert.assertTrue(result.owner.equals("John"));
@@ -85,18 +88,19 @@ public class DBGenericTests {
 
     @Test
     public void testDelete() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
             Dog dog = new Dog("King", 2, "John");
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
 
-            db.beginTransaction();
-            db.add(dog);
-            db.commit();
-            Assert.assertEquals(GenericIndex.getInstance().getTotalNumberOfRows(), 1);
+            table.beginTransaction();
+            table.add(dog);
+            table.commit();
+            Assert.assertEquals(table.getTotalRecordNumber(), 1);
 
-            db.beginTransaction();
-            db.delete(0);
-            db.commit();
-            Assert.assertEquals(GenericIndex.getInstance().getTotalNumberOfRows(), 0);
+            table.beginTransaction();
+            table.delete(0);
+            table.commit();
+            Assert.assertEquals(table.getTotalRecordNumber(), 0);
 
         } catch (Exception e) {
             Assert.fail();
@@ -105,20 +109,21 @@ public class DBGenericTests {
 
     @Test
     public void updateByName() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
             Dog dog = new Dog("King", 2, "John");
 
-            db.beginTransaction();
-            db.add(dog);
-            db.commit();
+            table.beginTransaction();
+            table.add(dog);
+            table.commit();
 
             Dog dog2 = new Dog("King", 3, "John");
 
-            db.beginTransaction();
-            db.update("King", dog2);
-            db.commit();
+            table.beginTransaction();
+            table.update("King", dog2);
+            table.commit();
 
-            Dog result = (Dog)db.read(0);
+            Dog result = (Dog)table.read(0);
             Assert.assertEquals(result.pname, "King");
             Assert.assertTrue(result.age == 3);
 
@@ -129,18 +134,20 @@ public class DBGenericTests {
 
     @Test
     public void updateByRowNumber() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            
             Dog dog = new Dog("King", 2, "John");
-            db.beginTransaction();
-            db.add(dog);
-            db.commit();
+            table.beginTransaction();
+            table.add(dog);
+            table.commit();
 
             Dog dog2 = new Dog("King2", 2, "John");
-            db.beginTransaction();
-            db.update(0, dog2);
-            db.commit();
+            table.beginTransaction();
+            table.update(0, dog2);
+            table.commit();
 
-            Dog result = (Dog)db.read(0);
+            Dog result = (Dog)table.read(0);
             Assert.assertEquals(result.pname, "King2");
 
         } catch (Exception e) {
@@ -150,15 +157,16 @@ public class DBGenericTests {
 
     @Test
     public void testSearch() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
             Dog dog = new Dog("King", 2, "John");
-            db.add(dog);
+            table.add(dog);
             Dog dog2 = new Dog("King2", 2, "John");
-            db.add(dog2);
-            db.commit();
+            table.add(dog2);
+            table.commit();
 
-            Dog result = (Dog)db.search("King");
+            Dog result = (Dog)table.search("King");
             Assert.assertEquals("King", result.pname);
             Assert.assertEquals(2, result.age);
             Assert.assertEquals("John", result.owner);
@@ -170,16 +178,17 @@ public class DBGenericTests {
 
     @Test
     public void testSearchWithLeveinshteinWith_0_tolerance() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
 
             Dog dog = new Dog("King", 2, "John");
-            db.add(dog);
+            table.add(dog);
             Dog dog2 = new Dog("King1", 2, "John");
-            db.add(dog2);
-            db.commit();
+            table.add(dog2);
+            table.commit();
 
-            List<Object> result = db.searchWithLeveinshtein("King", 0);
+            List<Object> result = table.searchWithLeveinshtein("King", 0);
             Assert.assertEquals(result.size(), 1);
             Assert.assertEquals(((Dog)result.get(0)).pname, "King");
 
@@ -190,15 +199,16 @@ public class DBGenericTests {
 
     @Test
     public void testSearchWithLeveinshteinWith_1_tolerance() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
             Dog dog = new Dog("King", 2, "John");
-            db.add(dog);
+            table.add(dog);
             Dog dog2 = new Dog("King1", 2, "John");
-            db.add(dog2);
-            db.commit();
+            table.add(dog2);
+            table.commit();
 
-            List<Object> result = db.searchWithLeveinshtein("King", 1);
+            List<Object> result = table.searchWithLeveinshtein("King", 1);
             Assert.assertEquals(result.size(), 2);
 
         }catch (Exception e) {
@@ -208,16 +218,17 @@ public class DBGenericTests {
 
     @Test
     public void testWithRegexp() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
 
             Dog dog = new Dog("King", 2, "John");
-            db.add(dog);
+            table.add(dog);
             Dog dog2 = new Dog("King1", 2, "John");
-            db.add(dog2);
-            db.commit();
+            table.add(dog2);
+            table.commit();
 
-            List<Object> result = db.searchWithRegexp("Ki.*");
+            List<Object> result = table.searchWithRegexp("Ki.*");
             Assert.assertEquals(result.size(), 2);
 
         }catch (Exception e) {
@@ -228,14 +239,15 @@ public class DBGenericTests {
 
     @Test
     public void transactionTest_COMMIT() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
 
             Dog dog = new Dog("King", 2, "John");
-            db.add(dog);
-            db.commit();
+            table.add(dog);
+            table.commit();
 
-            List<Object> result = db.searchWithRegexp("Ki.*");
+            List<Object> result = table.searchWithRegexp("Ki.*");
             Assert.assertEquals(result.size(), 1);
             Dog findDog = (Dog)result.get(0);
             Assert.assertEquals(findDog.pname
@@ -248,16 +260,17 @@ public class DBGenericTests {
 
     @Test
     public void transactionTest_ROLLBACK() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
 
             Dog dog = new Dog("King", 2, "John");
-            db.add(dog);
-            db.rollback();
+            table.add(dog);
+            table.rollback();
 
-            List<Object> result = db.searchWithRegexp("Jo.*");
+            List<Object> result = table.searchWithRegexp("Jo.*");
             Assert.assertEquals(result.size(), 0);
-            List<DebugRowInfo> infos = ((DBGenericServer) db).listAllRowsWithDebug();
+            List<DebugRowInfo> infos = table.listAllRowsWithDebug();
             Assert.assertEquals(infos.size(), 1);
 
 
@@ -273,15 +286,16 @@ public class DBGenericTests {
 
     @Test
     public void transactionTest_COMMIT_with_multiple_begin() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
 
             Dog dog = new Dog("King", 2, "John");
-            db.add(dog);
-            db.beginTransaction();
-            db.commit();
+            table.add(dog);
+            table.beginTransaction();
+            table.commit();
 
-            List<Object> result = db.searchWithRegexp("Ki.*");
+            List<Object> result = table.searchWithRegexp("Ki.*");
             Assert.assertEquals(result.size(), 1);
             Dog searchResult = (Dog)result.get(0);
             Assert.assertEquals(searchResult.pname
@@ -294,20 +308,21 @@ public class DBGenericTests {
 
     @Test
     public void transactionTest_ROLLBACK_with_multiple_begin() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileName, DOG_SCHEMA, Dog.class)) {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
             Dog dog = new Dog("King", 2, "John");
             Dog dog2 = new Dog("King2", 2, "John");
 
-            db.beginTransaction();
-            db.add(dog);
+            table.beginTransaction();
+            table.add(dog);
 
-            db.beginTransaction();
-            db.add(dog2);
-            db.rollback();
+            table.beginTransaction();
+            table.add(dog2);
+            table.rollback();
 
-            List<Object> result = db.searchWithRegexp("Ki.*");
+            List<Object> result = table.searchWithRegexp("Ki.*");
             Assert.assertEquals(result.size(), 0);
-            List<DebugRowInfo> infos = ((DBGenericServer)db).listAllRowsWithDebug();
+            List<DebugRowInfo> infos = table.listAllRowsWithDebug();
             Assert.assertEquals(infos.size(), 2);
 
             DebugRowInfo dri = infos.get(0);
@@ -321,16 +336,18 @@ public class DBGenericTests {
 
     @Test
     public void testAddPerson() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileNameForPerson, PERSON_SCHEMA, Person.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileNameForPerson, PERSON_SCHEMA, Person.class);
+
+            table.beginTransaction();
             Person p = new Person("John",44, "Berlin", "www-404","This is a description");
 
-            db.add(p);
-            db.commit();
+            table.add(p);
+            table.commit();
 
-            Assert.assertEquals(GenericIndex.getInstance().getTotalNumberOfRows(), 1);
+            Assert.assertEquals(table.getTotalRecordNumber(), 1);
 
-            Object result = db.search("John");
+            Object result = table.search("John");
             Assert.assertNotNull(result);
             Assert.assertTrue(result.getClass().getName().equalsIgnoreCase("com.mixer.raw.Person"));
             Assert.assertEquals(((Person)result).pname, "John");
@@ -344,8 +361,9 @@ public class DBGenericTests {
 
     @Test
     public void testDBVersion() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileNameForPerson, PERSON_SCHEMA, Person.class)) {
-           String version = ((DBGenericServer)db).getDBVersion();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileNameForPerson, PERSON_SCHEMA, Person.class);
+           String version = table.getTableVersion();
            Assert.assertEquals(version, "0.1");
 
         } catch (Exception e) {
@@ -355,22 +373,25 @@ public class DBGenericTests {
 
     @Test
     public void testLoadDataToIndex() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileNameForPerson, PERSON_SCHEMA, Person.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileNameForPerson, PERSON_SCHEMA, Person.class);
+            table.beginTransaction();
             Person p1 = new Person("John",44, "Berlin", "www-404","This is a description");
             Person p2 = new Person("John1",44, "Berlin", "www-404","This is a description");
-            db.add(p1);
-            db.add(p2);
-            db.commit();
+            table.add(p1);
+            table.add(p2);
+            table.commit();
 
-            Assert.assertEquals(GenericIndex.getInstance().getTotalNumberOfRows(), 2);
+            Assert.assertEquals(table.getTotalRecordNumber(), 2);
         } catch (Exception e) {
             Assert.fail();
         }
 
         // reopen database
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileNameForPerson, PERSON_SCHEMA, Person.class)) {
-            long recNumber = db.getTotalRecordNumber();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+
+            Table table = db.useTable(dbFileNameForPerson, PERSON_SCHEMA, Person.class);
+            long recNumber = table.getTotalRecordNumber();
             Assert.assertEquals(recNumber, 2);
         } catch (Exception e) {
             Assert.fail();
@@ -379,26 +400,27 @@ public class DBGenericTests {
 
     @Test
     public void testDefragmentation() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileNameForPerson, PERSON_SCHEMA, Person.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileNameForPerson, PERSON_SCHEMA, Person.class);
+            table.beginTransaction();
             Person p1 = new Person("John",44, "Berlin", "www-404","This is a description");
             Person p2 = new Person("John1",44, "Berlin", "www-404","This is a description");
             Person p3 = new Person("John2",44, "Berlin", "www-404","This is a description");
-            db.add(p1);
-            db.add(p2);
-            db.add(p3);
-            db.commit();
+            table.add(p1);
+            table.add(p2);
+            table.add(p3);
+            table.commit();
 
             // delete the first record
-            db.beginTransaction();
-            db.delete(0);
-            db.commit();
+            table.beginTransaction();
+            table.delete(0);
+            table.commit();
 
             // call the defragmentation
-            ((DBGenericServer)db).defragmentDatabase();
-            long recNum = db.getTotalRecordNumber();
+            table.defragmentDatabase();
+            long recNum = table.getTotalRecordNumber();
             Assert.assertEquals(recNum, 2);
-            List<DebugRowInfo> debugList = ((DBGenericServer) db).listAllRowsWithDebug();
+            List<DebugRowInfo> debugList = table.listAllRowsWithDebug();
             Assert.assertEquals(debugList.size(), 2);
 
         } catch (Exception e) {
@@ -410,20 +432,21 @@ public class DBGenericTests {
 
     @Test
     public void testROLLBACK_DELETE() {
-        try(DBGeneric db = DBFactory.getGenericDB(dbFileNameForPerson, PERSON_SCHEMA, Person.class)) {
-            db.beginTransaction();
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileNameForPerson, PERSON_SCHEMA, Person.class);
+            table.beginTransaction();
             Person p1 = new Person("John",44, "Berlin", "www-404","This is a description");
-            db.add(p1);
-            db.commit();
+            table.add(p1);
+            table.commit();
 
             // delete the first record
-            db.beginTransaction();
-            db.delete(0);
-            db.rollback();
+            table.beginTransaction();
+            table.delete(0);
+            table.rollback();
 
             // call the defragmentation
-            ((DBGenericServer)db).defragmentDatabase();
-            long recNum = db.getTotalRecordNumber();
+            table.defragmentDatabase();
+            long recNum = table.getTotalRecordNumber();
             Assert.assertEquals(recNum, 1);
 
         } catch (Exception e) {
@@ -434,12 +457,109 @@ public class DBGenericTests {
 
     @Test
     public void testNoIndexInformationIsSet() {
-        try (DBGeneric db = DBFactory.getGenericDB(dbFileNameForPerson, PERSON_SCHEMA_WITHOUT_INDEX_INFO, Person.class)) {
-
+        try (DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileNameForPerson, PERSON_SCHEMA_WITHOUT_INDEX_INFO, Person.class);
         }catch(IOException e) {
             Assert.fail();
         }catch (DBException dbe) {
             Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void useMultipleTables() {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
+            Dog dog = new Dog("King", 2, "John");
+            table.add(dog);
+            table.commit();
+
+            Table table2 = db.useTable(dbFileNameForPerson, PERSON_SCHEMA, Person.class);
+            table2.beginTransaction();
+            Person p1 = new Person("John",44, "Berlin", "www-404","This is a description");
+            table2.add(p1);
+            table2.commit();
+
+            Assert.assertEquals(table.getTotalRecordNumber(), 1);
+            Assert.assertEquals(table2.getTotalRecordNumber(), 1);
+
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void deleteTableTest() {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
+            Dog dog = new Dog("King", 2, "John");
+            table.add(dog);
+            table.commit();
+
+            boolean result = db.dropCurrentTable();
+            Assert.assertTrue(result);
+
+            result = db.tableExists(dbFileName);
+            Assert.assertFalse(result);
+
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void deleteTableWithNameTest() {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
+            Dog dog = new Dog("King", 2, "John");
+            table.add(dog);
+            table.commit();
+
+            boolean result = db.dropTable(dbFileName);
+            Assert.assertTrue(result);
+
+            result = db.tableExists(dbFileName);
+            Assert.assertFalse(result);
+
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void exportTableToSCVTest() {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
+            Dog dog = new Dog("King", 2, "John");
+            table.add(dog);
+            table.commit();
+
+            String result = db.exportCurrentTableToSCV();
+            Assert.assertEquals("King, 2, John", result);
+
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void exportTableToSCVWithNameTest() {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
+            Dog dog = new Dog("King", 2, "John");
+            table.add(dog);
+            table.commit();
+
+            String result = db.exportTableToCSV(dbFileName, DOG_SCHEMA, Dog.class);
+            Assert.assertEquals("King, 2, John", result);
+
+        } catch (Exception e) {
+            Assert.fail();
         }
     }
 

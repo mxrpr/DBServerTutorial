@@ -21,6 +21,7 @@ public class GenericBaseFileHandler {
     protected Schema schema;
     protected Class zclass;
     protected String indexByFieldName;
+    protected GenericIndex index;
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     final Lock readLock = readWriteLock.readLock();
@@ -28,12 +29,17 @@ public class GenericBaseFileHandler {
     private final static int HEADER_INFO_SPACE = 100;
 
 
-    GenericBaseFileHandler(final String dbFileName) throws FileNotFoundException {
+    GenericBaseFileHandler(final String dbFileName,
+                           final GenericIndex index) throws FileNotFoundException {
+        this.index = index;
         this.dbFileName = dbFileName;
         this.dbFile = new RandomAccessFile(dbFileName, "rw");
     }
 
-    GenericBaseFileHandler(final RandomAccessFile randomAccessFile, final String dbFileName) {
+    GenericBaseFileHandler(final RandomAccessFile randomAccessFile,
+                           final String dbFileName,
+                           final GenericIndex index) {
+        this.index = index;
         this.dbFileName = dbFileName;
         this.dbFile = randomAccessFile;
     }
@@ -41,9 +47,9 @@ public class GenericBaseFileHandler {
     public void initialise() throws IOException {
         DBServer.LOGGER.info("[GenericBaseFileHandler] Initialise");
         if (this.dbFile.length() == 0) {
-            this.setDBVersion();
+            this.setTableVersion();
         } else {
-            String dbVersion = this.getDBVersion();
+            String dbVersion = this.getTableVersion();
             System.out.println("DB version: " + dbVersion);
         }
         DBServer.LOGGER.info("[GenericBaseFileHandler] Initialisation done");
@@ -87,7 +93,7 @@ public class GenericBaseFileHandler {
                     boolean isDeleted = this.dbFile.readBoolean();
 
                     if (!isDeleted) {
-                        GenericIndex.getInstance().add(currentPos - 1);
+                        this.index.add(currentPos - 1);
                     } else
                         deletedRows++;
 
@@ -104,7 +110,7 @@ public class GenericBaseFileHandler {
                                 zclass);
 
                         String _name = (String) object.getClass().getDeclaredField(this.schema.indexBy).get(object);
-                        GenericIndex.getInstance().addIndexedValue(_name, rowNum);
+                        this.index.addIndexedValue(_name, rowNum);
                         rowNum++;
                     }
                     currentPos += recordLength;
@@ -241,7 +247,7 @@ public class GenericBaseFileHandler {
         }
     }
 
-    public String getDBName() {
+    public String getTableName() {
         return this.dbFileName;
     }
 
@@ -259,15 +265,15 @@ public class GenericBaseFileHandler {
                 // add it to the index
 
                 String _name = (String) object.getClass().getDeclaredField(this.schema.indexBy).get(object);
-                GenericIndex.getInstance().addIndexedValue(_name, GenericIndex.getInstance().getTotalNumberOfRows());
-                GenericIndex.getInstance().add(position);
+                this.index.addIndexedValue(_name, this.index.getTotalNumberOfRows());
+                this.index.add(position);
             }
 
             // operate on deleted rows
             for (long position : deletedRows) {
                 this.dbFile.seek(position);
                 this.dbFile.writeBoolean(false);
-                GenericIndex.getInstance().removeByFilePosition(position);
+                this.index.removeByFilePosition(position);
             }
         } catch (IllegalAccessException | NoSuchFieldException | IOException e) {
             throw new DBException(e.getMessage());
@@ -289,7 +295,7 @@ public class GenericBaseFileHandler {
                 // deleted
                 this.dbFile.seek(position + 1);
                 this.dbFile.writeBoolean(true);
-                GenericIndex.getInstance().removeByFilePosition(position);
+                this.index.removeByFilePosition(position);
             }
 
             for (long position : deletedRows) {
@@ -307,8 +313,8 @@ public class GenericBaseFileHandler {
 
                 // add it to the index
                 String _name = (String) object.getClass().getDeclaredField("pname").get(object);
-                GenericIndex.getInstance().addIndexedValue(_name, GenericIndex.getInstance().getTotalNumberOfRows());
-                GenericIndex.getInstance().add(position);
+                this.index.addIndexedValue(_name, this.index.getTotalNumberOfRows());
+                this.index.add(position);
             }
         } catch (IllegalAccessException | NoSuchFieldException | IOException e) {
             e.printStackTrace();
@@ -319,7 +325,7 @@ public class GenericBaseFileHandler {
         }
     }
 
-    private void setDBVersion() throws IOException {
+    private void setTableVersion() throws IOException {
         DBServer.LOGGER.info("[GenericBaseFileHandler] set DB version");
         this.dbFile.seek(0);
         String VERSION = "0.1";
@@ -329,7 +335,7 @@ public class GenericBaseFileHandler {
         this.dbFile.write(new String(chars).getBytes());
     }
 
-    public String getDBVersion() throws IOException {
+    public String getTableVersion() throws IOException {
         readLock.lock();
         try {
             this.dbFile.seek(0);

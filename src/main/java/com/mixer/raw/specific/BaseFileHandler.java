@@ -34,10 +34,10 @@ public class BaseFileHandler {
 
     public void initialise() throws IOException {
         if (this.dbFile.length() == 0) {
-            this.setDBVersion();
+            this.setTableVersion();
         }
         else{
-            String dbVersion = this.getDBVersion();
+            String dbVersion = this.getTableVersion();
             System.out.println("DB version: " + dbVersion);
         }
     }
@@ -210,7 +210,7 @@ public class BaseFileHandler {
         }
     }
 
-    public String getDBName() {
+    public String getTableName() {
         return this.dbFileName;
     }
 
@@ -273,7 +273,7 @@ public class BaseFileHandler {
         }
     }
 
-    private void setDBVersion() throws IOException {
+    private void setTableVersion() throws IOException {
         this.dbFile.seek(0);
         String VERSION = "0.1";
         this.dbFile.write(VERSION.getBytes(Charsets.UTF_8));
@@ -282,7 +282,7 @@ public class BaseFileHandler {
         this.dbFile.write(new String(chars).getBytes());
     }
 
-    private String getDBVersion() throws IOException {
+    private String getTableVersion() throws IOException {
         readLock.lock();
         try {
             this.dbFile.seek(0);

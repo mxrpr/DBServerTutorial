@@ -10,7 +10,7 @@ public final class DBFactory {
         return new DBServer(databaseName);
     }
 
-    public static DBGeneric getGenericDB(final String databaseName, final String schema, final Class zclass) throws DBException {
-        return new DBGenericServer(databaseName, schema, zclass);
+    public static DBGeneric getGenericDB() throws DBException {
+        return new DBGenericServer();
     }
 }

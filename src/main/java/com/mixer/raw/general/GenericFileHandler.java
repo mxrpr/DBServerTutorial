@@ -16,12 +16,14 @@ import java.util.Set;
 public class GenericFileHandler extends GenericBaseFileHandler {
 
 
-    public GenericFileHandler(final String dbFileName) throws FileNotFoundException {
-        super(dbFileName);
+    public GenericFileHandler(final String dbFileName, final GenericIndex index) throws FileNotFoundException {
+        super(dbFileName, index);
     }
 
-    public GenericFileHandler(final RandomAccessFile randomAccessFile, final String dbFileName) {
-        super(randomAccessFile, dbFileName);
+    public GenericFileHandler(final RandomAccessFile randomAccessFile,
+                              final String dbFileName,
+                              final GenericIndex index) {
+        super(randomAccessFile, dbFileName, index);
     }
 
 
@@ -33,7 +35,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
         try {
             String _name = (String) object.getClass().getDeclaredField(this.indexByFieldName).get(object);
 
-            if (GenericIndex.getInstance().hasInIndex(_name)) {
+            if (this.index.hasInIndex(_name)) {
                 throw new DuplicateNameException(String.format("Name '%s' already exists!", _name));
             }
 
@@ -106,7 +108,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
         DBServer.LOGGER.info("[GenericFileHandler] Read row: " + rowNumber);
         readLock.lock();
         try {
-            long bytePosition = GenericIndex.getInstance().getBytePosition(rowNumber);
+            long bytePosition = this.index.getBytePosition(rowNumber);
             if (bytePosition == -1) {
                 return null;
             }
@@ -130,7 +132,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
         DBServer.LOGGER.info("[GenericFileHandler] Delete row: " + rowNumber);
         writeLock.lock();
         try {
-            long bytePositionOfRecord = GenericIndex.getInstance().getBytePosition(rowNumber);
+            long bytePositionOfRecord = this.index.getBytePosition(rowNumber);
             if (bytePositionOfRecord == -1) {
                 throw new DBException("Row does not exists in Index");
             }
@@ -142,7 +144,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
             this.dbFile.writeBoolean(true);
 
             // update the index
-            GenericIndex.getInstance().remove(rowNumber);
+            this.index.remove(rowNumber);
             OperationUnit ou = new OperationUnit();
             ou.deletedRowPosition = bytePositionOfRecord;
             DBServer.LOGGER.info("[GenericFileHandler] Row deleted ");
@@ -178,7 +180,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
         DBServer.LOGGER.info("[GenericFileHandler] Update row: " + indexedFieldName);
         writeLock.lock();
         try {
-            long rowNumber = GenericIndex.getInstance().getRowNumberByIndex(indexedFieldName);
+            long rowNumber = this.index.getRowNumberByIndex(indexedFieldName);
             if (rowNumber == -1) {
                 return new OperationUnit();
             }
@@ -192,7 +194,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
 
     public Object search(String name) throws DBException {
         DBServer.LOGGER.info("[GenericFileHandler] Search by name: " + name);
-        long rowNumber = GenericIndex.getInstance().getRowNumberByIndex(name);
+        long rowNumber = this.index.getRowNumberByIndex(name);
         if (rowNumber == -1)
             return null;
         return this.readRow(rowNumber);
@@ -201,7 +203,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
     public List<Object> searchWithLeveinshtein(String indexedFieldName, int tolerance) throws DBException {
         List<Object> result = new ArrayList<>();
 
-        Set<String> names = GenericIndex.getInstance().getIndexedValues();
+        Set<String> names = this.index.getIndexedValues();
         List<String> goodNames = new ArrayList<>();
         for (String storedName : names) {
             if (Leveinshtein.leveinshteinDistance(storedName, indexedFieldName) <= tolerance)
@@ -209,7 +211,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
         }
         // now we have all the names, get the records
         for (String goodName : goodNames) {
-            long rowIndex = GenericIndex.getInstance().getRowNumberByIndex(goodName);
+            long rowIndex = this.index.getRowNumberByIndex(goodName);
             if (rowIndex != -1) {
                 Object p = this.readRow(rowIndex);
                 result.add(p);
@@ -223,7 +225,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
         DBServer.LOGGER.info("[GenericFileHandler] Search with regexp");
         List<Object> result = new ArrayList<>();
 
-        Set<String> names = GenericIndex.getInstance().getIndexedValues();
+        Set<String> names = this.index.getIndexedValues();
         List<String> goodNames = new ArrayList<>();
         for (String storedName : names) {
             if (storedName.matches(regexp))
@@ -231,7 +233,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
         }
         // now we have all the names, get the records
         for (String goodName : goodNames) {
-            long rowIndex = GenericIndex.getInstance().getRowNumberByIndex(goodName);
+            long rowIndex = this.index.getRowNumberByIndex(goodName);
             if (rowIndex != -1) {
                 Object p = this.readRow(rowIndex);
                 result.add(p);

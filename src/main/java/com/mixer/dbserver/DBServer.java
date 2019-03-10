@@ -221,7 +221,7 @@ public final class DBServer implements DB {
         }
 
         this.fileHandler.close();
-        String oldDatabaseName = this.fileHandler.getDBName();
+        String oldDatabaseName = this.fileHandler.getTableName();
 
         // copy temporary file back to db name
         Files.copy(tmpFile.toPath(), FileSystems.getDefault().getPath("", oldDatabaseName),

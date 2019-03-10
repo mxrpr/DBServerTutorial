@@ -1,6 +1,7 @@
+import com.mixer.raw.general.ICSVRepresentation;
 import com.mixer.util.JSONRep;
 
-public final class Dog implements JSONRep {
+public final class Dog implements JSONRep, ICSVRepresentation {
 
     public String pname;
     public int age;
@@ -17,5 +18,10 @@ public final class Dog implements JSONRep {
     @Override
     public String toJSON() {
         return String.format("{\"pname\" : \"%s\", \"age\": %d, \"owner\": \"%s\", }", this.pname, this.age, this.owner);
+    }
+
+    @Override
+    public String toSCV() {
+        return String.format("%s, %d, %s", this.pname, this.age, this.owner);
     }
 }
