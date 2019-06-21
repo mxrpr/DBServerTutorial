@@ -27,6 +27,13 @@ public class GenericFileHandler extends GenericBaseFileHandler {
     }
 
 
+    public String runQuery(final String query) {
+    	DBServer.LOGGER.info(String.format("[GenericFileHandler] Run query %s", query));
+    	
+    	DBServer.LOGGER.info("[GenericFileHandler] Running  query DONE");
+    	return null;
+    }
+    
     public OperationUnit add(final Object object, boolean defragOperation) throws DuplicateNameException, DBException {
 
 

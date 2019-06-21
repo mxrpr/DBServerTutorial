@@ -1,5 +1,10 @@
 package com.mixer.raw.general;
 
+/**
+ * MxrTable represents a table in the database. 
+ * This objects contains implementation of all operations which
+ * can be used to manipulate the database.
+ */
 import com.google.gson.Gson;
 import com.mixer.dbserver.DBGenericServer;
 import com.mixer.exceptions.DBException;
@@ -28,6 +33,15 @@ public class MxrTable implements Table {
     private GenericIndex index;
 
 
+    /**
+     * Constructs a new MxrTable object.
+     * 
+     * @param dbFileName Name of the database file
+     * @param schema	Schema of the object to be stored.Schema contains the object's field related information
+     * @param zclass	Class of the stored object
+     * @param indexPool	Reference to the used Index component
+     * @throws DBException 
+     */
     public MxrTable(final String dbFileName,
                     final String schema,
                     final Class zclass,
@@ -48,7 +62,13 @@ public class MxrTable implements Table {
             throw new DBException(e.getMessage());
         }
     }
-
+    
+    /**
+     * Initialise the object and the referenced objects, like the used FileHandler
+     * 
+     * @throws DBException If the initialisation fails, then we have to throw a
+     * DBException to stop the construction process
+     */
     private void initialise() throws DBException{
         try {
             this.fileHandler.initialise();
@@ -58,6 +78,12 @@ public class MxrTable implements Table {
         this.fileHandler.loadAllDataToIndex(this.zclass);
     }
 
+    /**
+     * Helper method to read the information stored in the schema
+     * 
+     * @param schema String
+     * @return The parsed Schema object
+     */
     private Schema readSchema(final String schema) {
         Gson gson = new Gson();
         Schema tmpSchema = gson.fromJson(schema, Schema.class);
@@ -68,7 +94,9 @@ public class MxrTable implements Table {
         return tmpSchema;
     }
 
-
+    /**
+     * When a table is closed, then all referenced/used objects must be cleaned and closed.
+     */
     @Override
     public void close() throws DBException {
         DBGenericServer.LOGGER.info("[" + this.getClass().getName() + "]" + "Closing DBServer");
@@ -286,4 +314,10 @@ public class MxrTable implements Table {
         return this.fileHandler.getTableName();
     }
 
+    @Override
+    public String runQuery(final String query) {
+    	DBGenericServer.LOGGER.info("[" + this.getClass().getName() + "]" + "Running SQL query: " + query);
+        this.fileHandler.runQuery(query);
+    	return null;
+    }
 }
