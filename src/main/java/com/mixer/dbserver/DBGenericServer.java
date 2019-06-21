@@ -133,9 +133,13 @@ public final class DBGenericServer implements DBGeneric {
 
 	@Override
 	public void runQuery(final String queryString) throws DBException {
+		if (queryString == null || queryString.isEmpty()) {
+			throw new DBException("Query string is empty or null!");
+		}
 		if (this.currentlyUsedTable == null) {
 			throw new DBException("No table is in use. Select a table!");
 		}
+
 		this.currentlyUsedTable.runQuery(queryString);
 	}
 

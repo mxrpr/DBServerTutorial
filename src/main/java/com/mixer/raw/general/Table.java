@@ -165,8 +165,7 @@ public interface Table {
     /**
      * Run SQL query
      * 
-     * @param query
-     * @return
+     * @param query SQL query string
      */
-    String runQuery(final String query);
+    void runQuery(final String query) throws DBException;
 }

@@ -20,9 +20,11 @@ import java.io.RandomAccessFile;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MxrTable implements Table {
 
@@ -315,9 +317,19 @@ public class MxrTable implements Table {
     }
 
     @Override
-    public String runQuery(final String query) {
+    public void runQuery(final String query) throws DBException {
     	DBGenericServer.LOGGER.info("[" + this.getClass().getName() + "]" + "Running SQL query: " + query);
-        this.fileHandler.runQuery(query);
-    	return null;
+    	Set<String> indexedValues = this.index.getIndexedValues();
+    	ArrayList<Object> allObjects = new ArrayList<>();
+    	// get all objects
+        // TODO this is very slow, and consumes a lot of memory, modify it
+    	for(String  value : indexedValues) {
+    		long rowNumber = this.index.getRowNumberByIndex(value);
+    		Object object = this.fileHandler.readRow(rowNumber);
+    		allObjects.add(object);
+    	}
+    	// run the query on these objects
+        // TODO implement it
+
     }
 }
