@@ -6,9 +6,9 @@ import com.mixer.exceptions.DBException;
 import com.mixer.exceptions.DuplicateNameException;
 import com.mixer.util.Leveinshtein;
 import com.mixer.util.OperationUnit;
-import kotlin.text.Charsets;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +88,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
                     throw new DBException(field.fieldName + " is null. Cannot store it");
                 if (field.fieldType.equals("String")) {
                     this.dbFile.writeInt(((String) value).length());
-                    this.dbFile.write(((String) value).getBytes(Charsets.UTF_8));
+                    this.dbFile.write(((String) value).getBytes(StandardCharsets.UTF_8));
 
                 } else if (field.fieldType.equals("int")) {
                     this.dbFile.writeInt(((Integer) value).intValue());
