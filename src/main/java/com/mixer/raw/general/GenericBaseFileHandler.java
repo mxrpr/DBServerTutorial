@@ -3,10 +3,10 @@ package com.mixer.raw.general;
 import com.mixer.dbserver.DBServer;
 import com.mixer.exceptions.DBException;
 import com.mixer.util.DebugRowInfo;
-import kotlin.text.Charsets;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -329,7 +329,7 @@ public class GenericBaseFileHandler {
         DBServer.LOGGER.info("[GenericBaseFileHandler] set DB version");
         this.dbFile.seek(0);
         String VERSION = "0.1";
-        this.dbFile.write(VERSION.getBytes(Charsets.UTF_8));
+        this.dbFile.write(VERSION.getBytes(StandardCharsets.UTF_8));
         char[] chars = new char[HEADER_INFO_SPACE - VERSION.length()];
         Arrays.fill(chars, ' ');
         this.dbFile.write(new String(chars).getBytes());

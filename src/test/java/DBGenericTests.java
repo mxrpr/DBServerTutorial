@@ -61,7 +61,7 @@ public class DBGenericTests {
             Assert.assertEquals(table.getTotalRecordNumber(), 1);
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -82,7 +82,7 @@ public class DBGenericTests {
             Assert.assertTrue(result.owner.equals("John"));
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -103,7 +103,7 @@ public class DBGenericTests {
             Assert.assertEquals(table.getTotalRecordNumber(), 0);
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -128,7 +128,7 @@ public class DBGenericTests {
             Assert.assertTrue(result.age == 3);
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -151,7 +151,7 @@ public class DBGenericTests {
             Assert.assertEquals(result.pname, "King2");
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -172,7 +172,7 @@ public class DBGenericTests {
             Assert.assertEquals("John", result.owner);
 
         }catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -193,7 +193,7 @@ public class DBGenericTests {
             Assert.assertEquals(((Dog)result.get(0)).pname, "King");
 
         }catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -212,7 +212,7 @@ public class DBGenericTests {
             Assert.assertEquals(result.size(), 2);
 
         }catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -232,7 +232,7 @@ public class DBGenericTests {
             Assert.assertEquals(result.size(), 2);
 
         }catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -254,7 +254,7 @@ public class DBGenericTests {
                     , "King");
 
         }catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -279,7 +279,7 @@ public class DBGenericTests {
             Assert.assertEquals(dri.isDeleted(), true);
 
         }catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -302,7 +302,7 @@ public class DBGenericTests {
                     , "King");
 
         }catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -330,7 +330,7 @@ public class DBGenericTests {
             Assert.assertEquals(dri.isDeleted(), true);
 
         }catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -354,7 +354,7 @@ public class DBGenericTests {
 
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -367,7 +367,7 @@ public class DBGenericTests {
            Assert.assertEquals(version, "0.1");
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -394,7 +394,7 @@ public class DBGenericTests {
             long recNumber = table.getTotalRecordNumber();
             Assert.assertEquals(recNumber, 2);
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -424,8 +424,7 @@ public class DBGenericTests {
             Assert.assertEquals(debugList.size(), 2);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -450,8 +449,7 @@ public class DBGenericTests {
             Assert.assertEquals(recNum, 1);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -460,7 +458,7 @@ public class DBGenericTests {
         try (DBGeneric db = DBFactory.getGenericDB()) {
             Table table = db.useTable(dbFileNameForPerson, PERSON_SCHEMA_WITHOUT_INDEX_INFO, Person.class);
         }catch(IOException e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }catch (DBException dbe) {
             Assert.assertTrue(true);
         }
@@ -485,7 +483,7 @@ public class DBGenericTests {
             Assert.assertEquals(table2.getTotalRecordNumber(), 1);
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -505,7 +503,7 @@ public class DBGenericTests {
             Assert.assertFalse(result);
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -525,7 +523,7 @@ public class DBGenericTests {
             Assert.assertFalse(result);
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -542,7 +540,7 @@ public class DBGenericTests {
             Assert.assertEquals("King, 2, John", result);
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -559,7 +557,7 @@ public class DBGenericTests {
             Assert.assertEquals("King, 2, John", result);
 
         } catch (Exception e) {
-            Assert.fail();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -571,5 +569,22 @@ public class DBGenericTests {
         File file2 = new File(dbFileNameForPerson);
         if (file2.exists())
             file2.delete();
+    }
+    
+    @Test
+    public void runSelectSQLQuery() {
+    	try(DBGeneric db = DBFactory.getGenericDB()) {
+    		// add a Dog entry to DB
+    		Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
+            Dog dog = new Dog("King", 2, "John");
+            table.add(dog);
+            table.commit();
+            
+            // run query
+            db.runQuery("select (pname, age, owner) where (pname='King')");
+    	} catch (Exception e) {
+    		Assert.fail(e.getMessage());
+    	}
     }
 }
