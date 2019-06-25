@@ -29,6 +29,23 @@ public final class SQLRegexp {
         return instance;
     }
 
+    /**
+     *
+     * @param queryString
+     * @param objects
+     *
+     * @return ResultSet
+     */
+    public ResultSet runQuery(final String queryString, final Object[] objects) {
+        // step 1
+        String[] tokens = this.parseSQL(queryString);
+
+        // step 2
+        SQLToken rootToken = this.buildTree(tokens);
+
+        // step 3 run the query
+        return this.render(rootToken, objects);
+    }
 //    public static void main(String[] args) {
 //        // String to be scanned to find the pattern.select
 //        //String line = "Update (name, address) values ('new name','new address') where (name='a1')";
