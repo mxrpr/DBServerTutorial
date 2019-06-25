@@ -336,10 +336,4 @@ public class MxrTable implements Table {
 
     	return sqlQuery.runQuery(query, allObjects.toArray());
     }
-// print out the result
-//        System.out.println(String.format("=== Object result (count: %d) ===", result.count()));
-//        for (Object obj : result) {
-//            System.out.println(obj.toString());
-//        }
-//
-//        System.out.println("=== /Object result ====");
+}
