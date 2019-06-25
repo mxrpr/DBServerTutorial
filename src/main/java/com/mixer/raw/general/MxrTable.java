@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.mixer.dbserver.DBGenericServer;
 import com.mixer.exceptions.DBException;
 import com.mixer.exceptions.DuplicateNameException;
+import com.mixer.query.sql.ResultSet;
 import com.mixer.transaction.ITransaction;
 import com.mixer.transaction.Transaction;
 import com.mixer.util.DebugRowInfo;
@@ -317,7 +318,7 @@ public class MxrTable implements Table {
     }
 
     @Override
-    public void runQuery(final String query) throws DBException {
+    public ResultSet runQuery(final String query) throws DBException {
     	DBGenericServer.LOGGER.info("[" + this.getClass().getName() + "]" + "Running SQL query: " + query);
     	Set<String> indexedValues = this.index.getIndexedValues();
     	ArrayList<Object> allObjects = new ArrayList<>();
@@ -330,6 +331,7 @@ public class MxrTable implements Table {
     	}
     	// run the query on these objects
         // TODO implement it
-
+        
+        return null;
     }
 }

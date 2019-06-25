@@ -1,6 +1,7 @@
 package com.mixer.dbserver;
 
 import com.mixer.exceptions.DBException;
+import com.mixer.query.sql.ResultSet;
 import com.mixer.raw.general.GenericIndexPool;
 import com.mixer.raw.general.ICSVRepresentation;
 import com.mixer.raw.general.MxrTable;
@@ -132,7 +133,7 @@ public final class DBGenericServer implements DBGeneric {
 	}
 
 	@Override
-	public void runQuery(final String queryString) throws DBException {
+	public ResultSet runQuery(final String queryString) throws DBException {
 		if (queryString == null || queryString.isEmpty()) {
 			throw new DBException("Query string is empty or null!");
 		}
@@ -141,6 +142,8 @@ public final class DBGenericServer implements DBGeneric {
 		}
 
 		this.currentlyUsedTable.runQuery(queryString);
+
+		return null;
 	}
 
 }

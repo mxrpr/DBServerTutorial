@@ -1,6 +1,7 @@
 package com.mixer.dbserver;
 
 import com.mixer.exceptions.DBException;
+import com.mixer.query.sql.ResultSet;
 import com.mixer.raw.general.Table;
 
 import java.io.Closeable;
@@ -87,8 +88,9 @@ public interface DBGeneric extends Closeable {
      * Runs a query against our database
      * 
      * @param queryString SQL query
-     * 
+     *
+     * @return ResultSet
      * @throws DBException  In case of any error, the API throws DBException
      */
-    void runQuery(final String queryString) throws DBException;
+    ResultSet runQuery(final String queryString) throws DBException;
 }
