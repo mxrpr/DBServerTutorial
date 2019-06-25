@@ -1,5 +1,6 @@
 import com.mixer.dbserver.*;
 import com.mixer.exceptions.DBException;
+import com.mixer.query.sql.ResultSet;
 import com.mixer.raw.Person;
 import com.mixer.raw.general.GenericIndex;
 import com.mixer.raw.general.Table;
@@ -582,7 +583,9 @@ public class DBGenericTests {
             table.commit();
             
             // run query
-            db.runQuery("select (pname, age, owner) where (pname='King')");
+            ResultSet result = db.runQuery("select (pname, age, owner) where (pname='King')");
+            //Assert.assertEquals(result.count(), 1);
+
     	} catch (Exception e) {
     		Assert.fail(e.getMessage());
     	}

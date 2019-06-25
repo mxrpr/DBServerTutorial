@@ -2,6 +2,7 @@ package com.mixer.raw.general;
 
 import com.mixer.exceptions.DBException;
 import com.mixer.exceptions.DuplicateNameException;
+import com.mixer.query.sql.ResultSet;
 import com.mixer.transaction.ITransaction;
 import com.mixer.util.DebugRowInfo;
 
@@ -166,6 +167,8 @@ public interface Table {
      * Run SQL query
      * 
      * @param query SQL query string
+     *
+     * @return ResultSet
      */
-    void runQuery(final String query) throws DBException;
+    ResultSet runQuery(final String query) throws DBException;
 }
