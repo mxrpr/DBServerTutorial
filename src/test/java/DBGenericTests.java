@@ -583,10 +583,17 @@ public class DBGenericTests {
             table.commit();
             
             // run query
-            ResultSet result = db.runQuery("select (pname, age, owner) where (pname='King')");
-            //Assert.assertEquals(result.count(), 1);
+            ResultSet result = db.runQuery("Select (pname, age, owner) where (pname='King')");
+            Assert.assertNotNull(result);
+            Assert.assertEquals(result.count(), 1);
+            Dog dogResult = (Dog)result.first();
+
+            Assert.assertEquals("King", dogResult.pname);
+            Assert.assertEquals(2, dogResult.age);
+            Assert.assertEquals("John", dogResult.owner);
 
     	} catch (Exception e) {
+    	    e.printStackTrace();
     		Assert.fail(e.getMessage());
     	}
     }

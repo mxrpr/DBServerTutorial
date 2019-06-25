@@ -141,9 +141,7 @@ public final class DBGenericServer implements DBGeneric {
 			throw new DBException("No table is in use. Select a table!");
 		}
 
-		this.currentlyUsedTable.runQuery(queryString);
-
-		return null;
+		return this.currentlyUsedTable.runQuery(queryString);
 	}
 
 }
