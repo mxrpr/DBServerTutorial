@@ -332,27 +332,8 @@ public class MxrTable implements Table {
     		allObjects.add(object);
     	}
     	// run the query on these objects
-        // TODO implement it
-        //        SQLRegexp regext = new SQLRegexp();
-
         SQLRegexp sqlQuery = SQLRegexp.getInstance();
 
-        // step 1
-        String[] tokens = sqlQuery.parseSQL(query);
-        // step 2
-        SQLToken rootToken = sqlQuery.buildTree(tokens);
-
-        // step 3 run the query
-        ResultSet result = sqlQuery.render(rootToken, allObjects.toArray());
-
-        return result;
+    	return sqlQuery.runQuery(query, allObjects.toArray());
     }
 }
-
-// print out the result
-//        System.out.println(String.format("=== Object result (count: %d) ===", result.count()));
-//        for (Object obj : result) {
-//            System.out.println(obj.toString());
-//        }
-//
-//        System.out.println("=== /Object result ====");

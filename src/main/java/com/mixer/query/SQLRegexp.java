@@ -18,7 +18,6 @@ public final class SQLRegexp {
     private static SQLRegexp instance = null;
 
     public SQLRegexp() {
-
     }
 
     public static SQLRegexp getInstance() {
@@ -29,31 +28,23 @@ public final class SQLRegexp {
         return instance;
     }
 
-//    public static void main(String[] args) {
-//        // String to be scanned to find the pattern.select
-//        //String line = "Update (name, address) values ('new name','new address') where (name='a1')";
-//        String line = "Select (name, address) where (name='a1') or (name='a2')";
-//        //String line = "Delete where (address='VP3')";
-//
-//        SQLRegexp regext = new SQLRegexp();
-//
-//        // step 1
-//        String[] tokens = regext.parseSQL(line);
-//        // step 2
-//        SQLToken rootToken = regext.buildTree(tokens);
-//        // step 3 : generate test data
-//        Object[] data = regext.generate();
-//        // step 4 run the query
-//        ResultSet result = regext.render(rootToken, data);
-//
-//        // print out the result
-//        System.out.println(String.format("=== Object result (count: %d) ===", result.count()));
-//        for (Object obj : result) {
-//            System.out.println(obj.toString());
-//        }
-//
-//        System.out.println("=== /Object result ====");
-//    }
+    /**
+     *
+     * @param queryString
+     * @param objects
+     *
+     * @return ResultSet
+     */
+    public ResultSet runQuery(final String queryString, final Object[] objects) {
+        // step 1
+        String[] tokens = this.parseSQL(queryString);
+
+        // step 2
+        SQLToken rootToken = this.buildTree(tokens);
+
+        // step 3 run the query
+        return this.render(rootToken, objects);
+    }
 
     /**
      * Parse the sql text with the help of the regular expression
@@ -61,7 +52,7 @@ public final class SQLRegexp {
      * @param sqlText SQL string
      * @return  parsed Token strings
      */
-    public String[] parseSQL(final String sqlText) {
+    private String[] parseSQL(final String sqlText) {
         String pattern = "(Update|Select|Delete|\\([^(\\)]+\\)|where|and|or|values)";
 
         // Create a Pattern object
@@ -86,7 +77,7 @@ public final class SQLRegexp {
      * @param tokens Array of the parsed tokens
      * @return Returns the root object, which is the Select object
      */
-    public SQLToken buildTree(String[] tokens) {
+    private SQLToken buildTree(String[] tokens) {
         // stack is used to store the parent element of the tree
         Stack<SQLToken> tokenStack = new Stack<>();
 
@@ -156,7 +147,7 @@ public final class SQLRegexp {
      * @param data the 'rows' of the database  - or it can be a content of an index
      * @return array of objects which the query finds
      */
-    public ResultSet render(final SQLToken rootToken, Object[] data) {
+    private ResultSet render(final SQLToken rootToken, Object[] data) {
         Object[] result = rootToken.render(data);
         return new ResultSet(result);
     }
