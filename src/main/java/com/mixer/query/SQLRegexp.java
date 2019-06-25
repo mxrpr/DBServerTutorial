@@ -18,7 +18,6 @@ public final class SQLRegexp {
     private static SQLRegexp instance = null;
 
     public SQLRegexp() {
-
     }
 
     public static SQLRegexp getInstance() {
@@ -46,31 +45,6 @@ public final class SQLRegexp {
         // step 3 run the query
         return this.render(rootToken, objects);
     }
-//    public static void main(String[] args) {
-//        // String to be scanned to find the pattern.select
-//        //String line = "Update (name, address) values ('new name','new address') where (name='a1')";
-//        String line = "Select (name, address) where (name='a1') or (name='a2')";
-//        //String line = "Delete where (address='VP3')";
-//
-//        SQLRegexp regext = new SQLRegexp();
-//
-//        // step 1
-//        String[] tokens = regext.parseSQL(line);
-//        // step 2
-//        SQLToken rootToken = regext.buildTree(tokens);
-//        // step 3 : generate test data
-//        Object[] data = regext.generate();
-//        // step 4 run the query
-//        ResultSet result = regext.render(rootToken, data);
-//
-//        // print out the result
-//        System.out.println(String.format("=== Object result (count: %d) ===", result.count()));
-//        for (Object obj : result) {
-//            System.out.println(obj.toString());
-//        }
-//
-//        System.out.println("=== /Object result ====");
-//    }
 
     /**
      * Parse the sql text with the help of the regular expression
