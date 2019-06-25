@@ -9,7 +9,9 @@ import com.google.gson.Gson;
 import com.mixer.dbserver.DBGenericServer;
 import com.mixer.exceptions.DBException;
 import com.mixer.exceptions.DuplicateNameException;
+import com.mixer.query.SQLRegexp;
 import com.mixer.query.sql.ResultSet;
+import com.mixer.query.sqltokens.SQLToken;
 import com.mixer.transaction.ITransaction;
 import com.mixer.transaction.Transaction;
 import com.mixer.util.DebugRowInfo;
@@ -331,7 +333,26 @@ public class MxrTable implements Table {
     	}
     	// run the query on these objects
         // TODO implement it
-        
-        return null;
+        //        SQLRegexp regext = new SQLRegexp();
+
+        SQLRegexp sqlQuery = SQLRegexp.getInstance();
+
+        // step 1
+        String[] tokens = sqlQuery.parseSQL(query);
+        // step 2
+        SQLToken rootToken = sqlQuery.buildTree(tokens);
+
+        // step 3 run the query
+        ResultSet result = sqlQuery.render(rootToken, allObjects.toArray());
+
+        return result;
     }
 }
+
+// print out the result
+//        System.out.println(String.format("=== Object result (count: %d) ===", result.count()));
+//        for (Object obj : result) {
+//            System.out.println(obj.toString());
+//        }
+//
+//        System.out.println("=== /Object result ====");
