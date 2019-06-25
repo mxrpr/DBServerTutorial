@@ -78,7 +78,7 @@ public final class SQLRegexp {
      * @param sqlText SQL string
      * @return  parsed Token strings
      */
-    public String[] parseSQL(final String sqlText) {
+    private String[] parseSQL(final String sqlText) {
         String pattern = "(Update|Select|Delete|\\([^(\\)]+\\)|where|and|or|values)";
 
         // Create a Pattern object
@@ -103,7 +103,7 @@ public final class SQLRegexp {
      * @param tokens Array of the parsed tokens
      * @return Returns the root object, which is the Select object
      */
-    public SQLToken buildTree(String[] tokens) {
+    private SQLToken buildTree(String[] tokens) {
         // stack is used to store the parent element of the tree
         Stack<SQLToken> tokenStack = new Stack<>();
 
@@ -173,7 +173,7 @@ public final class SQLRegexp {
      * @param data the 'rows' of the database  - or it can be a content of an index
      * @return array of objects which the query finds
      */
-    public ResultSet render(final SQLToken rootToken, Object[] data) {
+    private ResultSet render(final SQLToken rootToken, Object[] data) {
         Object[] result = rootToken.render(data);
         return new ResultSet(result);
     }
