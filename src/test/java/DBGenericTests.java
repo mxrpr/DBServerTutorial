@@ -597,4 +597,30 @@ public class DBGenericTests {
     		Assert.fail(e.getMessage());
     	}
     }
+    @Test
+    public void runDeleteSQLQuery() {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            // add a Dog entry to DB
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
+            Dog dog = new Dog("King", 2, "John");
+            table.add(dog);
+            table.commit();
+
+            // run query
+            ResultSet result = db.runQuery("Delete where (pname='King')");
+            Assert.assertNotNull(result);
+            // there is one element which was deleted
+            Assert.assertEquals(1, result.count());
+
+            // search the dog - we have to find no element
+            Object searchResult = table.search("King");
+            Assert.assertNull(searchResult);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+    }
+
 }
