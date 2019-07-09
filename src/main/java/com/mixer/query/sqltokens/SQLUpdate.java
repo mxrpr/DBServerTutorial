@@ -1,5 +1,7 @@
 package com.mixer.query.sqltokens;
 
+import com.mixer.query.sql.DBEntry;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.lang.reflect.Field;
@@ -34,8 +36,8 @@ public class SQLUpdate extends SQLToken {
      * @return The rest of the original results
      */
     @Override
-    public Object[] render(Object[] objects) {
-        HashSet<Object> result = new HashSet<>();
+    public DBEntry[] render(DBEntry[] objects) {
+        HashSet<DBEntry> result = new HashSet<>();
         
 
         this.expression = this.expression.trim().substring(1).trim();
@@ -56,7 +58,7 @@ public class SQLUpdate extends SQLToken {
             }else if(token.type == SQLTYPE.AND){
                 // the input array is produced by the last child.
                 // result.addAll(Arrays.asList(token.render(result.toArray())));
-                Object[] _res = token.render(result.toArray());
+                DBEntry[] _res = token.render(result.toArray(new DBEntry[0]));
                 result.clear();
                 result.addAll(Arrays.asList(_res));
             }
@@ -67,11 +69,11 @@ public class SQLUpdate extends SQLToken {
         }
         // update the elements from the table
         try{
-            for(Object o : result) {
+            for(DBEntry o : result) {
                 for(int i=0;i< fieldNames.length;i++){
-                    Field field = o.getClass().getDeclaredField(fieldNames[i].trim());
+                    Field field = o.object.getClass().getDeclaredField(fieldNames[i].trim());
                     field.setAccessible(true);
-                    field.set(o, this.values[i].substring(1, this.values[i].length()-1));
+                    field.set(o.object, this.values[i].substring(1, this.values[i].length()-1));
                 }
             }
         }catch(IllegalArgumentException|NoSuchFieldException|IllegalAccessException iae) {
@@ -79,7 +81,7 @@ public class SQLUpdate extends SQLToken {
             iae.printStackTrace();
         }
 
-        return result.toArray(new Object[0]);
+        return result.toArray(new DBEntry[0]);
     }
 
 }
