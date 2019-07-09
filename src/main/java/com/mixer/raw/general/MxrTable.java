@@ -10,6 +10,7 @@ import com.mixer.dbserver.DBGenericServer;
 import com.mixer.exceptions.DBException;
 import com.mixer.exceptions.DuplicateNameException;
 import com.mixer.query.SQLRegexp;
+import com.mixer.query.sql.DBEntry;
 import com.mixer.query.sql.ResultSet;
 import com.mixer.query.sqltokens.SQLToken;
 import com.mixer.transaction.ITransaction;
@@ -323,17 +324,72 @@ public class MxrTable implements Table {
     public ResultSet runQuery(final String query) throws DBException {
     	DBGenericServer.LOGGER.info("[" + this.getClass().getName() + "]" + "Running SQL query: " + query);
     	Set<String> indexedValues = this.index.getIndexedValues();
-    	ArrayList<Object> allObjects = new ArrayList<>();
+    	ArrayList<DBEntry> allObjects = new ArrayList<>();
     	// get all objects
         // TODO this is very slow, and consumes a lot of memory, modify it
     	for(String  value : indexedValues) {
     		long rowNumber = this.index.getRowNumberByIndex(value);
     		Object object = this.fileHandler.readRow(rowNumber);
-    		allObjects.add(object);
+    		allObjects.add(new DBEntry(object, rowNumber));
     	}
     	// run the query on these objects
         SQLRegexp sqlQuery = SQLRegexp.getInstance();
 
-    	return sqlQuery.runQuery(query, allObjects.toArray());
+
+    	ResultSet resultSet = sqlQuery.runQuery(query, allObjects.toArray(new DBEntry[0]));
+
+        if(sqlQuery.isDeleteOperation()) {
+            for (Object dbEntry : resultSet) {
+                this.performDeleteObject((DBEntry) dbEntry);
+            }
+        }
+        else if (sqlQuery.isUpdateOperation()){
+          for (Object o : resultSet) {
+                this.performUpdateObject(((DBEntry)o));
+            }
+
+        }
+
+        return resultSet.convertToPureObjects();
+    }
+
+
+    private void performDeleteObject(final DBEntry object) throws DBException {
+        //get the indexed field name
+        this.beginTransaction();
+        this.delete(object.rowIndex);
+        this.commit();
+    }
+
+   private void performUpdateObject(final DBEntry object) throws DBException {
+
+       try {
+           this.beginTransaction();
+           this.update(object.rowIndex, object.object);
+           this.commit();
+       } catch (DuplicateNameException e) {
+           this.rollback();
+           throw new DBException(e.getMessage());
+       }
+
+    }
+
+    /**
+     * Get the row number by an object.
+     * @param object
+     *
+     * @return long row numnber in database
+     */
+    private long getRowNumberFromObject(final Object object) throws DBException {
+        String indexedByField = this.schema.indexBy;
+        try {
+            //get the indexed field name
+            String value = (String) object.getClass().getField(indexedByField).get(object);
+            return this.index.getRowNumberByIndex(value);
+        }catch (IllegalAccessException e) {
+            throw new DBException(e.getMessage());
+        } catch (NoSuchFieldException e) {
+            throw new DBException(e.getMessage());
+        }
     }
 }
