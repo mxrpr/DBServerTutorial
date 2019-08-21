@@ -1,5 +1,7 @@
 package com.mixer.query;
 
+import com.mixer.exceptions.DBException;
+import com.mixer.query.sql.DBEntry;
 import com.mixer.query.sqltokens.*;
 import com.mixer.query.sql.ResultSet;
 
@@ -16,11 +18,14 @@ import java.util.regex.Pattern;
 public final class SQLRegexp {
 
     private static SQLRegexp instance = null;
+    private boolean isDeleteOperation = false;
+    private boolean isUpdateOperation = false;
 
     public SQLRegexp() {
     }
 
     public static SQLRegexp getInstance() {
+
         if(instance == null) {
             instance = new SQLRegexp();
         }
@@ -28,14 +33,24 @@ public final class SQLRegexp {
         return instance;
     }
 
+    public boolean isDeleteOperation() {
+        return this.isDeleteOperation;
+    }
+
+    public boolean isUpdateOperation() {
+        return this.isUpdateOperation;
+    }
+
     /**
      *
+     * Run query on the current table
+     *
      * @param queryString
-     * @param objects
+     * @param dbentries Array of DBEntry objects
      *
      * @return ResultSet
      */
-    public ResultSet runQuery(final String queryString, final Object[] objects) {
+    public ResultSet runQuery(final String queryString, final DBEntry[] dbentries) throws DBException {
         // step 1
         String[] tokens = this.parseSQL(queryString);
 
@@ -43,7 +58,7 @@ public final class SQLRegexp {
         SQLToken rootToken = this.buildTree(tokens);
 
         // step 3 run the query
-        return this.render(rootToken, objects);
+        return this.render(rootToken, dbentries);
     }
 
     /**
@@ -90,10 +105,12 @@ public final class SQLRegexp {
                 case "Delete":
                     SQLDelete delete = new SQLDelete(SQLTYPE.DELETE);
                     tokenStack.push(delete);
+                    this.isDeleteOperation = true;
                     break;
                 case "Update":
                     SQLUpdate update = new SQLUpdate(SQLTYPE.UPDATE);
                     tokenStack.push(update);
+                    this.isUpdateOperation = true;
                     break;
                 case "where":
                     SQLWhere where = new SQLWhere(SQLTYPE.WHERE);
@@ -147,8 +164,8 @@ public final class SQLRegexp {
      * @param data the 'rows' of the database  - or it can be a content of an index
      * @return array of objects which the query finds
      */
-    private ResultSet render(final SQLToken rootToken, Object[] data) {
-        Object[] result = rootToken.render(data);
+    private ResultSet render(final SQLToken rootToken, DBEntry[] data) throws DBException {
+        DBEntry[] result = rootToken.render(data);
         return new ResultSet(result);
     }
 }

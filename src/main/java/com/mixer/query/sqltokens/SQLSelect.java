@@ -1,5 +1,8 @@
 package com.mixer.query.sqltokens;
 
+import com.mixer.exceptions.DBException;
+import com.mixer.query.sql.DBEntry;
+
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -20,8 +23,8 @@ public class SQLSelect extends SQLToken {
      * o collects the results
      */
     @Override
-    public Object[] render(Object[] objects) {
-        HashSet<Object> result = new HashSet<>();
+    public DBEntry[] render(DBEntry[] objects) throws DBException {
+        HashSet<DBEntry> result = new HashSet<>();
         this.expression = this.expression.substring(1);
         this.expression = this.expression.substring(0, this.expression.length()-1);
         // not used in this example - later we will use it
@@ -37,7 +40,7 @@ public class SQLSelect extends SQLToken {
             }else if(token.type == SQLTYPE.AND){
                 // the input array is produced by the last child.
                 // result.addAll(Arrays.asList(token.render(result.toArray())));
-                Object[] _res = token.render(result.toArray());
+                DBEntry[] _res = token.render(result.toArray(new DBEntry[0]));
                 result.clear();
                 result.addAll(Arrays.asList(_res));
             }
@@ -47,7 +50,7 @@ public class SQLSelect extends SQLToken {
             }
         }
 
-        return result.toArray();
+        return result.toArray(new DBEntry[0]);
     }
 
 }

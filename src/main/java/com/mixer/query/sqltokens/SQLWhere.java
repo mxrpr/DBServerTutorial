@@ -1,5 +1,8 @@
 package com.mixer.query.sqltokens;
 
+import com.mixer.exceptions.DBException;
+import com.mixer.query.sql.DBEntry;
+
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,20 +59,16 @@ public class SQLWhere extends SQLToken {
     }
 
     @Override
-    public Object[] render(Object[] objects) {
-        Vector<Object> result = new Vector<>();
+    public DBEntry[] render(DBEntry[] dbEntries) {
+        Vector<DBEntry> result = new Vector<>();
         this.expression = this.expression.substring(1, this.expression.length()-1);
         // get the operation
         String operation = this.getOperation(this.expression);
         String[] fieldNameAndValue = this.getFieldNameAndValue(operation);
 
-//        int index = this.expression.indexOf("=");
-//        String fieldName = this.expression.substring(0, index).trim();
-//        String fieldValue = this.expression.substring(index+1, this.expression.length()).trim();
-
         try {
-            for (Object object : objects) {
-                Object retValue = this.hasFieldValue(object, fieldNameAndValue[0], fieldNameAndValue[1], operation);
+            for (DBEntry object : dbEntries) {
+                DBEntry retValue = this.hasFieldValue(object, fieldNameAndValue[0], fieldNameAndValue[1], operation);
 
                 if (retValue != null) {
                     result.add(retValue);
@@ -78,7 +77,7 @@ public class SQLWhere extends SQLToken {
         }catch(DBException dbe) {
             dbe.printStackTrace();
         }
-        return result.toArray();
+        return result.toArray(new DBEntry[0]);
     }
 
     /**
@@ -87,7 +86,7 @@ public class SQLWhere extends SQLToken {
      * What we have to do when we are implementin this into the DB server is to
      * throw exceptions when we registers syntax or other problems.
      * 
-     * @param object Stored object in the database on which the check is performed
+     * @param dbentry Object wich contains the stored object in the database on which the check is performed
      * @param fieldName Name of the field
      * @param fieldValue Value of the field
      * @param operation Operation used in expression
@@ -95,15 +94,15 @@ public class SQLWhere extends SQLToken {
      * 
      * @throws DBException
      */
-    protected Object hasFieldValue(final Object object,
+    protected DBEntry hasFieldValue(final DBEntry dbentry,
                                  final String fieldName,
                                  final String fieldValue,
                                  final String operation) throws DBException {
         try {
-            Object _fieldValue = object.getClass().getDeclaredField(fieldName).get(object);
+            Object _fieldValue = dbentry.object.getClass().getDeclaredField(fieldName).get(dbentry.object);
 
             if(this.handleOperation(_fieldValue, fieldValue, operation)) {
-                return object;
+                return dbentry;
             }
             return null;
 

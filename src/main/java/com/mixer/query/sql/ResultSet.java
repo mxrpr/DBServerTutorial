@@ -1,5 +1,6 @@
 package com.mixer.query.sql;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -17,7 +18,18 @@ public final class ResultSet implements Iterable<Object> {
 	public Iterator<Object> iterator() {
 		return new MyIterator(this);
     }
-	
+
+    public ResultSet convertToPureObjects() {
+        ArrayList<Object> _tmp = new ArrayList<>();
+        for(Object o: result) {
+            _tmp.add(((DBEntry)o).object);
+        }
+
+        this.result = _tmp.toArray();
+
+        return this;
+    }
+
 	public boolean isEmpty() {
 		return this.result.length == 0;
 	}
@@ -27,6 +39,8 @@ public final class ResultSet implements Iterable<Object> {
     }
 
     public Object first(){
+        if(this.result.length == 0)
+            return null;
         return this.result[0];
     }
 

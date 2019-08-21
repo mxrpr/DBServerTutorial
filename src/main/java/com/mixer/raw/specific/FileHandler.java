@@ -4,7 +4,6 @@ import com.mixer.exceptions.DuplicateNameException;
 import com.mixer.raw.Person;
 import com.mixer.util.Leveinshtein;
 import com.mixer.util.OperationUnit;
-import kotlin.text.Charsets;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -71,7 +70,7 @@ public class FileHandler extends BaseFileHandler {
 
             // store the name
             this.dbFile.writeInt(name.length());
-            this.dbFile.write(name.getBytes(Charsets.UTF_8));
+            this.dbFile.write(name.getBytes("UTF-8"));
 
             // store age
             this.dbFile.writeInt(age);

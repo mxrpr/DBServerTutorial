@@ -1,5 +1,7 @@
 package com.mixer.query.sqltokens;
 
+import com.mixer.query.sql.DBEntry;
+import com.mixer.exceptions.DBException;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -13,7 +15,7 @@ public class SQLDelete extends SQLToken {
     }
 
     /**
-     * Resposibility of this object is:
+     * Responsibility of this object is:
      * 
      * o coordinate the run of the child elements
      * o provide the necessary data set to the childs elements
@@ -22,8 +24,8 @@ public class SQLDelete extends SQLToken {
      * @return The rest of the original results
      */
     @Override
-    public Object[] render(Object[] objects) {
-        HashSet<Object> result = new HashSet<>();
+    public DBEntry[] render(DBEntry[] objects) throws DBException {
+        HashSet<DBEntry> result = new HashSet<>();
         /*
          * run through all childs, and call the render method.
          */
@@ -34,7 +36,7 @@ public class SQLDelete extends SQLToken {
             }else if(token.type == SQLTYPE.AND){
                 // the input array is produced by the last child.
                 // result.addAll(Arrays.asList(token.render(result.toArray())));
-                Object[] _res = token.render(result.toArray());
+                DBEntry[] _res = token.render(result.toArray(new DBEntry[0]));
                 result.clear();
                 result.addAll(Arrays.asList(_res));
             }
@@ -44,13 +46,13 @@ public class SQLDelete extends SQLToken {
             }
         }
         // delete the elements from the table
-        HashSet<Object> finalResult = new HashSet<>();
-        for(Object object : objects) {
-            if(!result.contains(object)) {
+        HashSet<DBEntry> finalResult = new HashSet<>();
+        for(DBEntry object : objects) {
+            if(result.contains(object)) {
                 finalResult.add(object);
             }
         }
-        return finalResult.toArray(new Object[0]);
+        return finalResult.toArray(new DBEntry[0]);
     }
 
 }
