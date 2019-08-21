@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class DBGenericTests {
+
     private final String dbFileName = "testgeneric.db";
     private final String dbFileNameForPerson = "testgenericperson.db";
 
@@ -49,6 +50,19 @@ public class DBGenericTests {
             "    {\"fieldName\": \"description\", \"fieldType\":\"String\"}\n" +
             "  ] " +
             "}";
+
+    @Before
+    public void deleteTable() {
+        try{
+            File dbFile = new File(dbFileName);
+            if(dbFile.exists())
+                dbFile.delete();
+            dbFile = new File(dbFileNameForPerson);
+            if(dbFile.exists())
+                dbFile.delete();
+        }catch(Exception e) {}
+    }
+
     @Test
     public void testAdd() {
         try(DBGeneric db = DBFactory.getGenericDB()) {
