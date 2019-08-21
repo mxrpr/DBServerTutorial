@@ -2,9 +2,9 @@ package com.mixer.raw.specific;
 
 import com.mixer.raw.Person;
 import com.mixer.util.DebugRowInfo;
-import kotlin.text.Charsets;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -276,7 +276,7 @@ public class BaseFileHandler {
     private void setTableVersion() throws IOException {
         this.dbFile.seek(0);
         String VERSION = "0.1";
-        this.dbFile.write(VERSION.getBytes(Charsets.UTF_8));
+        this.dbFile.write(VERSION.getBytes("UTF-8"));
         char[] chars = new char[HEADER_INFO_SPACE - VERSION.length()];
         Arrays.fill(chars, ' ');
         this.dbFile.write(new String(chars).getBytes());
