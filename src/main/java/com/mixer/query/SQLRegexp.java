@@ -1,5 +1,6 @@
 package com.mixer.query;
 
+import com.mixer.exceptions.DBException;
 import com.mixer.query.sql.DBEntry;
 import com.mixer.query.sqltokens.*;
 import com.mixer.query.sql.ResultSet;
@@ -49,7 +50,7 @@ public final class SQLRegexp {
      *
      * @return ResultSet
      */
-    public ResultSet runQuery(final String queryString, final DBEntry[] dbentries) {
+    public ResultSet runQuery(final String queryString, final DBEntry[] dbentries) throws DBException {
         // step 1
         String[] tokens = this.parseSQL(queryString);
 
@@ -163,7 +164,7 @@ public final class SQLRegexp {
      * @param data the 'rows' of the database  - or it can be a content of an index
      * @return array of objects which the query finds
      */
-    private ResultSet render(final SQLToken rootToken, DBEntry[] data) {
+    private ResultSet render(final SQLToken rootToken, DBEntry[] data) throws DBException {
         DBEntry[] result = rootToken.render(data);
         return new ResultSet(result);
     }

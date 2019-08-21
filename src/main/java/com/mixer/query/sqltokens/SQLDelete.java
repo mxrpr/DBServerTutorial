@@ -1,7 +1,7 @@
 package com.mixer.query.sqltokens;
 
 import com.mixer.query.sql.DBEntry;
-
+import com.mixer.exceptions.DBException;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -24,7 +24,7 @@ public class SQLDelete extends SQLToken {
      * @return The rest of the original results
      */
     @Override
-    public DBEntry[] render(DBEntry[] objects) {
+    public DBEntry[] render(DBEntry[] objects) throws DBException {
         HashSet<DBEntry> result = new HashSet<>();
         /*
          * run through all childs, and call the render method.

@@ -1,5 +1,6 @@
 package com.mixer.query.sqltokens;
 
+import com.mixer.exceptions.DBException;
 import com.mixer.query.sql.DBEntry;
 
 import java.util.Arrays;
@@ -22,7 +23,7 @@ public class SQLSelect extends SQLToken {
      * o collects the results
      */
     @Override
-    public DBEntry[] render(DBEntry[] objects) {
+    public DBEntry[] render(DBEntry[] objects) throws DBException {
         HashSet<DBEntry> result = new HashSet<>();
         this.expression = this.expression.substring(1);
         this.expression = this.expression.substring(0, this.expression.length()-1);

@@ -1,5 +1,6 @@
 package com.mixer.query.sqltokens;
 
+import com.mixer.exceptions.DBException;
 import com.mixer.query.sql.DBEntry;
 
 import java.util.Vector;
@@ -46,7 +47,7 @@ public abstract class SQLToken {
      *
      * @return DBEntry array
      */
-    public DBEntry[] render(DBEntry[] objects) {
+    public DBEntry[] render(DBEntry[] objects) throws DBException {
         return null;
     }
 }

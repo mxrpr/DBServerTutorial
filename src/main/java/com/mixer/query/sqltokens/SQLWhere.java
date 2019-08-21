@@ -1,5 +1,6 @@
 package com.mixer.query.sqltokens;
 
+import com.mixer.exceptions.DBException;
 import com.mixer.query.sql.DBEntry;
 
 import java.util.Vector;

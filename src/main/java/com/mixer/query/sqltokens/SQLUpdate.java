@@ -1,5 +1,6 @@
 package com.mixer.query.sqltokens;
 
+import com.mixer.exceptions.DBException;
 import com.mixer.query.sql.DBEntry;
 
 import java.util.Arrays;
@@ -36,7 +37,7 @@ public class SQLUpdate extends SQLToken {
      * @return The rest of the original results
      */
     @Override
-    public DBEntry[] render(DBEntry[] objects) {
+    public DBEntry[] render(DBEntry[] objects) throws DBException {
         HashSet<DBEntry> result = new HashSet<>();
         
 
@@ -79,6 +80,7 @@ public class SQLUpdate extends SQLToken {
         }catch(IllegalArgumentException|NoSuchFieldException|IllegalAccessException iae) {
             // TODO throw new DBexception
             iae.printStackTrace();
+            throw new DBException(iae.getMessage());
         }
 
         return result.toArray(new DBEntry[0]);
