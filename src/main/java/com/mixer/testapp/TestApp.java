@@ -5,7 +5,6 @@ import com.mixer.dbserver.DBServer;
 import com.mixer.exceptions.DuplicateNameException;
 import com.mixer.raw.specific.Index;
 import com.mixer.raw.Person;
-import com.mixer.transaction.ITransaction;
 import com.mixer.util.DebugRowInfo;
 
 import java.io.File;
@@ -16,8 +15,9 @@ import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 
-public class TestApp {
-    final static String dbFile = "Dbserver.db";
+@SuppressWarnings({"InfiniteLoopStatement", "ResultOfMethodCallIgnored", "CStyleArrayDeclaration"})
+class TestApp {
+    private final static String dbFile = "Dbserver.db";
 
     public static void main(String args[]) {
         new TestApp().performTest();
@@ -44,13 +44,14 @@ public class TestApp {
     }
 
 
-    void deleteDatabase() {
+    private void deleteDatabase() {
         File f = new File("Dbserver.db");
         if (f.exists())
             f.delete();
     }
 
 
+    @SuppressWarnings("unused")
     void doMultipleThreadTest() throws IOException {
 
         CountDownLatch cl = new CountDownLatch(3);
@@ -103,7 +104,7 @@ public class TestApp {
         }
     }
 
-    void addPersonWithTransaction() throws IOException, DuplicateNameException {
+    private void addPersonWithTransaction() throws IOException, DuplicateNameException {
         try (DBServer db = new DBServer(dbFile)) {
             db.beginTransaction();
             Person p = new Person("John", 444, "Berlin", "www-404", "This is a description");
@@ -112,6 +113,7 @@ public class TestApp {
         }
     }
 
+    @SuppressWarnings("unused")
     void removePersonWithTransaction() throws IOException, DuplicateNameException {
         try (DBServer db = new DBServer(dbFile)) {
             db.beginTransaction(); //  begin transaction
@@ -123,6 +125,7 @@ public class TestApp {
             db.commit();
         }
     }
+    @SuppressWarnings("unused")
     void defragmentDB() throws IOException, DuplicateNameException {
         try (DBServer db = new DBServer(dbFile)) {
             db.defragmentDatabase();
@@ -130,6 +133,7 @@ public class TestApp {
     }
 
 
+    @SuppressWarnings("unused")
     void testSearchWithRegexp() throws IOException {
         try (DBServer db = new DBServer(dbFile)) {
             List<Person> result = db.searchWithRegexp("Jo.*");
@@ -141,6 +145,7 @@ public class TestApp {
         }
     }
 
+    @SuppressWarnings("unused")
     void testLeveinsthein() throws IOException {
         try (DBServer db = new DBServer(dbFile)) {
             List<Person> result = db.searchWithLeveinshtein("John", 0);
@@ -151,6 +156,7 @@ public class TestApp {
         }
     }
 
+    @SuppressWarnings("unused")
     void testSearch() throws IOException {
         try (DBServer db = new DBServer(dbFile)) {
             Person p = db.search("John1");
@@ -158,7 +164,7 @@ public class TestApp {
         }
     }
 
-    void listAllRecords() throws Exception {
+    private void listAllRecords() throws Exception {
         try (DBServer db = new DBServer(dbFile)) {
             List<DebugRowInfo> result = db.listAllRowsWithDebug();
             System.out.println("Total row number: " + Index.getInstance().getTotalNumberOfRows());
@@ -185,13 +191,14 @@ public class TestApp {
         System.out.println(s);
     }
 
+    @SuppressWarnings("unused")
     void delete(int number) throws Exception {
         try (DB db = new DBServer(dbFile)) {
             db.delete(number);
         }
     }
 
-    void fillDB(int rowNumber) throws Exception {
+    private void fillDB(int rowNumber) throws Exception {
 
         try (DB db = new DBServer(dbFile)) {
             for (int i = 0; i < rowNumber; i++) {
@@ -203,6 +210,7 @@ public class TestApp {
         }
     }
 
+    @SuppressWarnings("unused")
     public void fragmentDatabase() throws IOException, DuplicateNameException {
 
         try (DB db = new DBServer(dbFile)) {

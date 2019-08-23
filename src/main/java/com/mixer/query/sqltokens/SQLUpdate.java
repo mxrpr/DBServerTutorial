@@ -11,7 +11,6 @@ import java.lang.reflect.Field;
  * Select object represents the 'Select keyword' in the SQL query
  */
 public class SQLUpdate extends SQLToken {
-    private String[] values = null;
     private SQLToken tokenToUse = null;
 
     public SQLUpdate(SQLTYPE type) {
@@ -46,7 +45,7 @@ public class SQLUpdate extends SQLToken {
         //get the new values
         String _tmp =  this.tokenToUse.expression.trim().substring(1);
         _tmp = _tmp.substring(0, _tmp.length()-1);
-        this.values = _tmp.split(",");
+        String[] values = _tmp.split(",");
         String[] fieldNames = this.expression.trim().split(",");
 
         /*
@@ -74,11 +73,10 @@ public class SQLUpdate extends SQLToken {
                 for(int i=0;i< fieldNames.length;i++){
                     Field field = o.object.getClass().getDeclaredField(fieldNames[i].trim());
                     field.setAccessible(true);
-                    field.set(o.object, this.values[i].substring(1, this.values[i].length()-1));
+                    field.set(o.object, values[i].substring(1, values[i].length()-1));
                 }
             }
         }catch(IllegalArgumentException|NoSuchFieldException|IllegalAccessException iae) {
-            // TODO throw new DBexception
             iae.printStackTrace();
             throw new DBException(iae.getMessage());
         }

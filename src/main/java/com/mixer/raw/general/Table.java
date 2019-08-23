@@ -56,7 +56,7 @@ public interface Table {
     /**
      * Read object from a specific row
      * 
-     * @param rownNumber Number of the row we would like to read
+     * @param rowNumber Number of the row we would like to read
      * @return object The read object
      * 
      * @throws DBException If there is an error during meanwhile we try to read the
@@ -79,7 +79,7 @@ public interface Table {
      * Search object by a specific value
      * 
      * @param indexedFieldName Value of the indexed field
-     * @param tolerance
+     * @param tolerance int, the tolerance value (check the algorithm)
      * @return List of found objects
      * 
      * @throws DBException If there is an error during meanwhile we try to search the

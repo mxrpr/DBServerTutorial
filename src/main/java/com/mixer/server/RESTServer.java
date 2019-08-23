@@ -4,15 +4,15 @@ import io.javalin.Javalin;
 import io.javalin.JavalinEvent;
 
 
-public final class RESTServer {
-    Javalin app;
+final class RESTServer {
+    private final Javalin app;
 
-    RESTServer() {
+    private RESTServer() {
         app = Javalin.create().port(7001);
         app.event(JavalinEvent.SERVER_STOPPING, () -> DBController.shutdown());
     }
 
-    void doJob() {
+    private void doJob() {
         app.start();
         app.get("/listall", DBController.fetchAllRecords);
         app.get("/add", DBController.addPerson);

@@ -11,9 +11,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 
-public final class DBController {
+final class DBController {
     private static DB DATABASE;
 
     static {
@@ -45,7 +46,7 @@ public final class DBController {
     public static final Handler addPerson = ctx -> {
 
         String name = ctx.queryParam("name");
-        int age = Integer.parseInt(ctx.queryParam("age"));
+        int age = Integer.parseInt(Objects.requireNonNull(ctx.queryParam("age")));
         String address = ctx.queryParam("address");
         String carplate = ctx.queryParam("carplate");
         String description = ctx.queryParam("description");
@@ -70,9 +71,7 @@ public final class DBController {
         List<Person> persons =  DATABASE.searchWithLeveinshtein(name, 1);
         LinkedList<String> result = new LinkedList<>();
 
-        persons.forEach(i->{
-            result.add(i.toJSON());
-        });
+        persons.forEach(i-> result.add(i.toJSON()));
 
         ctx.json(result);
     };

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class GenericFileHandler extends GenericBaseFileHandler {
+class GenericFileHandler extends GenericBaseFileHandler {
 
 
     public GenericFileHandler(final String dbFileName, final GenericIndex index) throws FileNotFoundException {
@@ -27,13 +27,13 @@ public class GenericFileHandler extends GenericBaseFileHandler {
     }
 
 
-    public String runQuery(final String query) {
-    	DBServer.LOGGER.info(String.format("[GenericFileHandler] Run query %s", query));
-    	
-    	DBServer.LOGGER.info("[GenericFileHandler] Running  query DONE");
-    	return null;
-    }
-    
+//    public String runQuery(final String query) {
+//    	DBServer.LOGGER.info(String.format("[GenericFileHandler] Run query %s", query));
+//
+//    	DBServer.LOGGER.info("[GenericFileHandler] Running  query DONE");
+//    	return null;
+//    }
+//
     public OperationUnit add(final Object object, boolean defragOperation) throws DuplicateNameException, DBException {
 
 
@@ -91,7 +91,7 @@ public class GenericFileHandler extends GenericBaseFileHandler {
                     this.dbFile.write(((String) value).getBytes(StandardCharsets.UTF_8));
 
                 } else if (field.fieldType.equals("int")) {
-                    this.dbFile.writeInt(((Integer) value).intValue());
+                    this.dbFile.writeInt((Integer) value);
                 }
                 // TODO implement other field types
             }
@@ -172,7 +172,6 @@ public class GenericFileHandler extends GenericBaseFileHandler {
             OperationUnit operation = new OperationUnit();
             operation.deletedRowPosition = deleteoperation.deletedRowPosition;
             operation.addedRowPosition = addoperation.addedRowPosition;
-            operation.succesfullOperation = true;
 
             DBServer.LOGGER.info("[GenericFileHandler] Update row done");
             return operation;

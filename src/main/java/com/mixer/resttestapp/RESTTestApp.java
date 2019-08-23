@@ -11,8 +11,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public final class RESTTestApp {
+@SuppressWarnings({"InfiniteLoopStatement", "unused", "UnnecessaryCallToStringValueOf"})
+final class RESTTestApp {
 
+    @SuppressWarnings("CharsetObjectCanBeUsed")
     private class ParameterBuilder {
         String getStringParameters(Map<String, String> parameters) throws UnsupportedEncodingException {
             StringBuilder sb = new StringBuilder(500);
@@ -28,6 +30,7 @@ public final class RESTTestApp {
 
     public static void main(String[] args) {
         RESTTestApp app = new RESTTestApp();
+        // infinite loop
         while (true) {
             app.performTest();
             try {
@@ -94,7 +97,7 @@ public final class RESTTestApp {
 
     private void doRequest(final String path, Map<String, String> parameters) throws IOException {
 
-        URL url = null;
+        URL url;
         if (parameters != null)
             url =
                     new URL("http://localhost:7001/" + path + "?" + new ParameterBuilder().getStringParameters(parameters));

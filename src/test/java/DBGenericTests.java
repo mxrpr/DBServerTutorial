@@ -2,7 +2,6 @@ import com.mixer.dbserver.*;
 import com.mixer.exceptions.DBException;
 import com.mixer.query.sql.ResultSet;
 import com.mixer.raw.Person;
-import com.mixer.raw.general.GenericIndex;
 import com.mixer.raw.general.Table;
 import com.mixer.util.DebugRowInfo;
 import org.junit.Assert;
@@ -12,7 +11,9 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class DBGenericTests {
 
     private final String dbFileName = "testgeneric.db";
@@ -52,7 +53,7 @@ public class DBGenericTests {
             "}";
 
     @Before
-    public void deleteTable() {
+    public void deleteTable() throws DBException {
         try{
             File dbFile = new File(dbFileName);
             if(dbFile.exists())
@@ -60,7 +61,10 @@ public class DBGenericTests {
             dbFile = new File(dbFileNameForPerson);
             if(dbFile.exists())
                 dbFile.delete();
-        }catch(Exception e) {}
+        }catch(Exception e) {
+            e.printStackTrace();
+            throw new DBException(e.getMessage());
+        }
     }
 
     @Test
@@ -92,9 +96,9 @@ public class DBGenericTests {
 
             Assert.assertEquals(table.getTotalRecordNumber(), 1);
             Dog result = (Dog)table.read(0);
-            Assert.assertTrue(result.pname.equals("King"));
-            Assert.assertTrue(result.age == 2 );
-            Assert.assertTrue(result.owner.equals("John"));
+            Assert.assertEquals("King", result.pname);
+            Assert.assertEquals(2, result.age);
+            Assert.assertEquals("John", result.owner);
 
         } catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -140,7 +144,7 @@ public class DBGenericTests {
 
             Dog result = (Dog)table.read(0);
             Assert.assertEquals(result.pname, "King");
-            Assert.assertTrue(result.age == 3);
+            Assert.assertEquals(3, result.age);
 
         } catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -290,8 +294,8 @@ public class DBGenericTests {
 
 
             DebugRowInfo dri = infos.get(0);
-            Assert.assertEquals(dri.isTemporary(), false);
-            Assert.assertEquals(dri.isDeleted(), true);
+            Assert.assertFalse(dri.isTemporary());
+            Assert.assertTrue(dri.isDeleted());
 
         }catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -341,8 +345,8 @@ public class DBGenericTests {
             Assert.assertEquals(infos.size(), 2);
 
             DebugRowInfo dri = infos.get(0);
-            Assert.assertEquals(dri.isTemporary(), false);
-            Assert.assertEquals(dri.isDeleted(), true);
+            Assert.assertFalse(dri.isTemporary());
+            Assert.assertTrue(dri.isDeleted());
 
         }catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -471,7 +475,7 @@ public class DBGenericTests {
     @Test
     public void testNoIndexInformationIsSet() {
         try (DBGeneric db = DBFactory.getGenericDB()) {
-            Table table = db.useTable(dbFileNameForPerson, PERSON_SCHEMA_WITHOUT_INDEX_INFO, Person.class);
+            db.useTable(dbFileNameForPerson, PERSON_SCHEMA_WITHOUT_INDEX_INFO, Person.class);
         }catch(IOException e) {
             Assert.fail(e.getMessage());
         }catch (DBException dbe) {
@@ -602,7 +606,7 @@ public class DBGenericTests {
             Assert.assertEquals(result.count(), 1);
             Dog dogResult = (Dog)result.first();
 
-            Assert.assertEquals("King", dogResult.pname);
+            Assert.assertEquals("King", Objects.requireNonNull(dogResult).pname);
             Assert.assertEquals(2, dogResult.age);
             Assert.assertEquals("John", dogResult.owner);
 

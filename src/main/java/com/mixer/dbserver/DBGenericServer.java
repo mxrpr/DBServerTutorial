@@ -14,9 +14,9 @@ import java.util.logging.Logger;
 
 public final class DBGenericServer implements DBGeneric {
 	// table name, reference to table instance
-	private Map<String, Table> tablePool;
+	private final Map<String, Table> tablePool;
 	private Table currentlyUsedTable = null;
-	private GenericIndexPool indexPool = null;
+	private final GenericIndexPool indexPool;
 
 	public static final Logger LOGGER = Logger.getLogger("DBServer");
 	private static final String PROPERTY_FILE_NAME = "config.properties";

@@ -9,6 +9,7 @@ import java.util.HashSet;
 /**
  * Select object represents the 'Select keyword' in the SQL query
  */
+@SuppressWarnings("unused")
 public class SQLSelect extends SQLToken {
 
     public SQLSelect(SQLTYPE type) {

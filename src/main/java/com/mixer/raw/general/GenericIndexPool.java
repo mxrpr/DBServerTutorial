@@ -5,7 +5,6 @@ import com.mixer.exceptions.DBException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This class holds reference to all GenericIndex objects.
@@ -15,7 +14,7 @@ import java.util.Set;
 public final class GenericIndexPool {
 
     // tableName, index
-    private Map<String, GenericIndex> indexStore;
+    private final Map<String, GenericIndex> indexStore;
 
     public GenericIndexPool() {
         this.indexStore = Collections.synchronizedMap(new HashMap<>());

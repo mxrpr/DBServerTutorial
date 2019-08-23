@@ -4,7 +4,7 @@ import com.mixer.raw.Person;
 import com.mixer.util.DebugRowInfo;
 
 import java.io.*;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -94,13 +94,14 @@ public class BaseFileHandler {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     Person readFromByteStream(final DataInputStream stream) throws IOException {
         Person person = new Person();
 
         int nameLength = stream.readInt();
         byte[] b = new byte[nameLength];
         stream.read(b);
-        person.pname = new String(b, "UTF-8");
+        person.pname = new String(b, StandardCharsets.UTF_8);
 
         // age
         person.age = stream.readInt();
@@ -276,7 +277,7 @@ public class BaseFileHandler {
     private void setTableVersion() throws IOException {
         this.dbFile.seek(0);
         String VERSION = "0.1";
-        this.dbFile.write(VERSION.getBytes("UTF-8"));
+        this.dbFile.write(VERSION.getBytes(StandardCharsets.UTF_8));
         char[] chars = new char[HEADER_INFO_SPACE - VERSION.length()];
         Arrays.fill(chars, ' ');
         this.dbFile.write(new String(chars).getBytes());
@@ -289,7 +290,7 @@ public class BaseFileHandler {
             byte[] b = new byte[HEADER_INFO_SPACE];
             this.dbFile.read(b);
 
-            return new String(b, "UTF-8").trim();
+            return new String(b, StandardCharsets.UTF_8).trim();
         }finally {
             readLock.unlock();
         }

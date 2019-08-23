@@ -32,6 +32,7 @@ public interface DB extends Closeable {
 
     void rollback() throws IOException;
 
+    // ToDo make unit test for it!
     long getTotalRecordNumber();
 
     void close() throws IOException;

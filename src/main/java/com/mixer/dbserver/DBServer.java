@@ -192,6 +192,7 @@ public final class DBServer implements DB {
         return this.fileHandler.loadAllDataFromFile();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void defragmentDatabase() throws IOException, DuplicateNameException {
         LOGGER.info("[DBServer] Defragmenting database");
         File tmpFile = File.createTempFile("defrag", "dat");

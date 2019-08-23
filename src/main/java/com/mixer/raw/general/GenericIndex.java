@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class GenericIndex {
 
-	private Schema schema;
+	private final Schema schema;
 
 	// row number, byte position
 	private final ConcurrentHashMap<Long, Long> rowIndex;
