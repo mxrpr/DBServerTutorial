@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.List;
 
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class DBBasicTests {
     private final String dbFileName = "testdb.db";
 
@@ -32,6 +33,19 @@ public class DBBasicTests {
     }
 
     @Test
+    public void testTotalRowNumber() {
+        try(DB db = DBFactory.getSpecificDB(dbFileName)) {
+            db.beginTransaction();
+            Person p =  new Person("Jonh",44, "Berlin", "www-404","This is a description");
+            db.add(p);
+            db.commit();
+            Assert.assertEquals(Index.getInstance().getTotalNumberOfRows(), 1);
+            Assert.assertEquals(db.getTotalRecordNumber(), 1);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+    @Test
     public void testRead() {
         try(DB db = DBFactory.getSpecificDB(dbFileName)) {
             Person p =new Person("John",44, "Berlin", "www-404","This is a description");
@@ -42,10 +56,10 @@ public class DBBasicTests {
 
             Assert.assertEquals(Index.getInstance().getTotalNumberOfRows(), 1);
             Person person = db.read(0);
-            Assert.assertTrue(person.pname.equals("John"));
-            Assert.assertTrue(person.address.equals("Berlin") );
-            Assert.assertTrue(person.carplatenumber.equals("www-404"));
-            Assert.assertTrue(person.description.equals("This is a description"));
+            Assert.assertEquals("John", person.pname);
+            Assert.assertEquals("Berlin", person.address);
+            Assert.assertEquals("www-404", person.carplatenumber);
+            Assert.assertEquals("This is a description", person.description);
 
         } catch (Exception e) {
             Assert.fail();
@@ -222,8 +236,8 @@ public class DBBasicTests {
 
 
             DebugRowInfo dri = infos.get(0);
-            Assert.assertEquals(dri.isTemporary(), false);
-            Assert.assertEquals(dri.isDeleted(), true);
+            Assert.assertFalse(dri.isTemporary());
+            Assert.assertTrue(dri.isDeleted());
 
         }catch (Exception e) {
             Assert.fail();
@@ -269,8 +283,8 @@ public class DBBasicTests {
             Assert.assertEquals(infos.size(), 2);
 
             DebugRowInfo dri = infos.get(0);
-            Assert.assertEquals(dri.isTemporary(), false);
-            Assert.assertEquals(dri.isDeleted(), true);
+            Assert.assertFalse(dri.isTemporary());
+            Assert.assertTrue(dri.isDeleted());
 
         }catch (Exception e) {
             Assert.fail();

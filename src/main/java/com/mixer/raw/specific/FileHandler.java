@@ -6,6 +6,7 @@ import com.mixer.util.Leveinshtein;
 import com.mixer.util.OperationUnit;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -70,7 +71,7 @@ public class FileHandler extends BaseFileHandler {
 
             // store the name
             this.dbFile.writeInt(name.length());
-            this.dbFile.write(name.getBytes("UTF-8"));
+            this.dbFile.write(name.getBytes(StandardCharsets.UTF_8));
 
             // store age
             this.dbFile.writeInt(age);
@@ -155,7 +156,6 @@ public class FileHandler extends BaseFileHandler {
             OperationUnit operation = new OperationUnit();
             operation.deletedRowPosition = deleteoperation.deletedRowPosition;
             operation.addedRowPosition = addoperation.addedRowPosition;
-            operation.succesfullOperation = true;
 
             return operation;
 

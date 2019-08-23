@@ -22,7 +22,7 @@ public class SQLWhere extends SQLToken {
      * @param exp Expression itself - for example (address='Wien')
      * @return The operator - for example '=' or '>'
      */
-    protected String getOperation(final String exp) {
+    private String getOperation(final String exp) {
         String retValue = "=";
         if(exp.contains(">"))
         {
@@ -92,12 +92,12 @@ public class SQLWhere extends SQLToken {
      * @param operation Operation used in expression
      * @return  The value of the expression (The found object)
      * 
-     * @throws DBException
+     * @throws DBException In case of any exception, the method will throw a DBException
      */
-    protected DBEntry hasFieldValue(final DBEntry dbentry,
-                                 final String fieldName,
-                                 final String fieldValue,
-                                 final String operation) throws DBException {
+    private DBEntry hasFieldValue(final DBEntry dbentry,
+                                  final String fieldName,
+                                  final String fieldValue,
+                                  final String operation) throws DBException {
         try {
             Object _fieldValue = dbentry.object.getClass().getDeclaredField(fieldName).get(dbentry.object);
 
@@ -121,7 +121,7 @@ public class SQLWhere extends SQLToken {
      * @param operation What operation we have to use
      * @return the condition from the expression if true or false
      */
-    protected boolean handleOperation(final Object originalFieldValue,
+    private boolean handleOperation(final Object originalFieldValue,
                                     final Object toTestValue,
                                     final String operation) {
         switch (operation) {

@@ -1,10 +1,6 @@
 package com.mixer.raw.general;
 
-/**
- * MxrTable represents a table in the database. 
- * This objects contains implementation of all operations which
- * can be used to manipulate the database.
- */
+
 import com.google.gson.Gson;
 import com.mixer.dbserver.DBGenericServer;
 import com.mixer.exceptions.DBException;
@@ -12,7 +8,6 @@ import com.mixer.exceptions.DuplicateNameException;
 import com.mixer.query.SQLRegexp;
 import com.mixer.query.sql.DBEntry;
 import com.mixer.query.sql.ResultSet;
-import com.mixer.query.sqltokens.SQLToken;
 import com.mixer.transaction.ITransaction;
 import com.mixer.transaction.Transaction;
 import com.mixer.util.DebugRowInfo;
@@ -30,6 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * MxrTable represents a table in the database.
+ * This objects contains implementation of all operations which
+ * can be used to manipulate the database.
+ */
 public class MxrTable implements Table {
 
     private GenericFileHandler fileHandler;
@@ -46,7 +46,7 @@ public class MxrTable implements Table {
      * @param schema	Schema of the object to be stored.Schema contains the object's field related information
      * @param zclass	Class of the stored object
      * @param indexPool	Reference to the used Index component
-     * @throws DBException 
+     * @throws DBException In case of error, DBException will be thrown
      */
     public MxrTable(final String dbFileName,
                     final String schema,
@@ -239,6 +239,7 @@ public class MxrTable implements Table {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void defragmentDatabase() throws IOException, DuplicateNameException, DBException {
         DBGenericServer.LOGGER.info("[" + this.getClass().getName() + "]" + "Defragmenting database");
         File tmpFile = File.createTempFile("defrag", "dat");
@@ -374,22 +375,22 @@ public class MxrTable implements Table {
 
     }
 
-    /**
-     * Get the row number by an object.
-     * @param object
-     *
-     * @return long row numnber in database
-     */
-    private long getRowNumberFromObject(final Object object) throws DBException {
-        String indexedByField = this.schema.indexBy;
-        try {
-            //get the indexed field name
-            String value = (String) object.getClass().getField(indexedByField).get(object);
-            return this.index.getRowNumberByIndex(value);
-        }catch (IllegalAccessException e) {
-            throw new DBException(e.getMessage());
-        } catch (NoSuchFieldException e) {
-            throw new DBException(e.getMessage());
-        }
-    }
+//    /**
+//     * Get the row number by an object.
+//     * @param object
+//     *
+//     * @return long row numnber in database
+//     */
+//    private long getRowNumberFromObject(final Object object) throws DBException {
+//        String indexedByField = this.schema.indexBy;
+//        try {
+//            //get the indexed field name
+//            String value = (String) object.getClass().getField(indexedByField).get(object);
+//            return this.index.getRowNumberByIndex(value);
+//        }catch (IllegalAccessException e) {
+//            throw new DBException(e.getMessage());
+//        } catch (NoSuchFieldException e) {
+//            throw new DBException(e.getMessage());
+//        }
+//    }
 }

@@ -35,7 +35,7 @@ public interface DBGeneric extends Closeable {
     /**
      * Drop table
      * 
-     * @param tableName
+     * @param tableName Name of the table
      * @return true if the deletion of the table is successfull
      * 
      * @throws DBException In case of any error, the API throws DBException
@@ -47,8 +47,7 @@ public interface DBGeneric extends Closeable {
      * Check whether a given table exists or not
      * 
      * @return true if the the table exists
-     * 
-     * @throws DBException In case of any error, the API throws DBException
+     *
      */
 
     boolean tableExists(final String tableName);
@@ -80,7 +79,7 @@ public interface DBGeneric extends Closeable {
     /**
      * Close the database
      * 
-     * @throws DBException  In case of any error, the API throws DBException
+     * @throws IOException  In case of any error, the API throws DBException
      */
     void close() throws IOException;
     

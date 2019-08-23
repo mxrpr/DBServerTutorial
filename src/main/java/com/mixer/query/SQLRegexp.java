@@ -21,7 +21,7 @@ public final class SQLRegexp {
     private boolean isDeleteOperation = false;
     private boolean isUpdateOperation = false;
 
-    public SQLRegexp() {
+    private SQLRegexp() {
     }
 
     public static SQLRegexp getInstance() {
@@ -45,7 +45,7 @@ public final class SQLRegexp {
      *
      * Run query on the current table
      *
-     * @param queryString
+     * @param queryString The SQL query string
      * @param dbentries Array of DBEntry objects
      *
      * @return ResultSet
@@ -68,7 +68,7 @@ public final class SQLRegexp {
      * @return  parsed Token strings
      */
     private String[] parseSQL(final String sqlText) {
-        String pattern = "(Update|Select|Delete|\\([^(\\)]+\\)|where|and|or|values)";
+        String pattern = "(Update|Select|Delete|\\([^()]+\\)|where|and|or|values)";
 
         // Create a Pattern object
         Pattern r = Pattern.compile(pattern);
@@ -160,7 +160,7 @@ public final class SQLRegexp {
 
     /**
      * Run the query
-     * @param rootToken
+     * @param rootToken SQLToken for the root element in the tree
      * @param data the 'rows' of the database  - or it can be a content of an index
      * @return array of objects which the query finds
      */

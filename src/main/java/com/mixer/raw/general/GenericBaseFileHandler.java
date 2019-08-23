@@ -14,14 +14,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class GenericBaseFileHandler {
+class GenericBaseFileHandler {
 
     RandomAccessFile dbFile;
     private final String dbFileName;
-    protected Schema schema;
-    protected Class zclass;
-    protected String indexByFieldName;
-    protected GenericIndex index;
+    Schema schema;
+    Class zclass;
+    String indexByFieldName;
+    final GenericIndex index;
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     final Lock readLock = readWriteLock.readLock();
@@ -130,6 +130,7 @@ public class GenericBaseFileHandler {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     Object readFromByteStream(final DataInputStream stream, final Class zclass) throws IOException {
         Object result;
         try {
@@ -140,7 +141,7 @@ public class GenericBaseFileHandler {
                     int fieldLength = stream.readInt();
                     byte[] b = new byte[fieldLength];
                     stream.read(b);
-                    String value = new String(b, "UTF-8");
+                    String value = new String(b, StandardCharsets.UTF_8);
                     // set the field value to result object
                     result.getClass().getDeclaredField(field.fieldName).set(result, value);
                 } else if (field.fieldType.equalsIgnoreCase("int")) {
@@ -342,13 +343,13 @@ public class GenericBaseFileHandler {
             byte[] b = new byte[HEADER_INFO_SPACE];
             this.dbFile.read(b);
 
-            return new String(b, "UTF-8").trim();
+            return new String(b, StandardCharsets.UTF_8).trim();
         } finally {
             readLock.unlock();
         }
     }
 
-    protected int getFieldLengthByType(Field field, Object object) throws NoSuchFieldException, IllegalAccessException {
+    int getFieldLengthByType(Field field, Object object) throws NoSuchFieldException, IllegalAccessException {
         int result = 0;
 
         switch (field.fieldType) {

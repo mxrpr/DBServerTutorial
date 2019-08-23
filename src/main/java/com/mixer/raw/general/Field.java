@@ -1,6 +1,7 @@
 package com.mixer.raw.general;
 
-public final class Field {
+@SuppressWarnings("unused")
+final class Field {
     public String fieldName;
     public String fieldType;
 

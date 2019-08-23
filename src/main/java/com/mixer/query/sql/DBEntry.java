@@ -5,10 +5,10 @@ package com.mixer.query.sql;
  */
 public final class DBEntry {
     // the stored object
-    public Object object;
+    public final Object object;
 
     // index of the object
-    public long rowIndex;
+    public final long rowIndex;
 
     public DBEntry(final Object object, final long rowIndex) {
         this.object = object;
