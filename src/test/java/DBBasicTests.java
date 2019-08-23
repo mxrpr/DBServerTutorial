@@ -33,6 +33,19 @@ public class DBBasicTests {
     }
 
     @Test
+    public void testTotalRowNumber() {
+        try(DB db = DBFactory.getSpecificDB(dbFileName)) {
+            db.beginTransaction();
+            Person p =  new Person("Jonh",44, "Berlin", "www-404","This is a description");
+            db.add(p);
+            db.commit();
+            Assert.assertEquals(Index.getInstance().getTotalNumberOfRows(), 1);
+            Assert.assertEquals(db.getTotalRecordNumber(), 1);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+    @Test
     public void testRead() {
         try(DB db = DBFactory.getSpecificDB(dbFileName)) {
             Person p =new Person("John",44, "Berlin", "www-404","This is a description");
