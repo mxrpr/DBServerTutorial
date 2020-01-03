@@ -21,11 +21,11 @@ public final class GenericIndex {
 
 	/**
 	 * Constructor needs the shema, because it contains information about the object fields,
-	 * indexed field. All these information is used to ctore/load data from/to database file
+	 * indexed field. All these information is used to store/load data from/to database file
 	 *  
 	 * @param schema Scheme
 	 * @throws DBException If the schema is null or is empty, then we cannot read/write
-	 * object into file, so we have to stop createing the GenericIndex file.  
+	 * object into file, so we have to stop creating the GenericIndex file.
 	 */
 	public GenericIndex(final Schema schema) throws DBException {
 		this.schema = schema;
@@ -58,7 +58,7 @@ public final class GenericIndex {
 	}
 
 	/**
-	 * Remove a specidifc row from the index 
+	 * Remove a specific row from the index
 	 * 
 	 * @param row Row number
 	 */
