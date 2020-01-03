@@ -76,8 +76,14 @@ public final class Index {
     public void removeByFilePosition(long position) {
         if (this.rowIndex.isEmpty())
             return;
-        long row = this.rowIndex.search(1, (k,v)-> v==position?k:-1);
-        if (row != -1) {
+//        long row = this.rowIndex.search(1, (k, v) -> v == position ? k : -1);
+        Long row = this.rowIndex.search(1, (k,v) -> {
+           if (v == position )
+               return k;
+           return null;
+       });
+
+        if (row != null) {
             this.remove(row);
         }
     }
