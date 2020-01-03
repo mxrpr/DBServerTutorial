@@ -676,4 +676,109 @@ public class DBGenericTests {
             Assert.fail(e.getMessage());
         }
     }
+
+    @Test
+    public void test_add_remove_override_issue() {
+        try(DBGeneric db = DBFactory.getGenericDB()) {
+            Table table = db.useTable(dbFileName, DOG_SCHEMA, Dog.class);
+            table.beginTransaction();
+
+            Dog dog = new Dog("King1", 2, "John1");
+            table.beginTransaction();
+            table.add(dog);
+            table.commit();
+
+            dog = new Dog("King2", 2, "John2");
+            table.beginTransaction();
+            table.add(dog);
+            table.commit();
+
+            // check the total row number
+            Assert.assertEquals(2, table.getTotalRecordNumber());
+
+            //remove a record
+            table.beginTransaction();
+            table.delete(1);
+            table.commit();
+
+            // check the total row number
+            Assert.assertEquals(1, table.getTotalRecordNumber());
+
+            // add a new row
+            dog = new Dog("King3", 2, "John3");
+            table.beginTransaction();
+            table.add(dog);
+            table.commit();
+
+            // check the total row number
+            Assert.assertEquals(2, table.getTotalRecordNumber());
+
+            // entry with name  King3 and King2 must be there
+            Dog searchResult = (Dog)table.search("King1");
+            Assert.assertEquals("King1", searchResult.pname);
+
+            searchResult = (Dog)table.search("King3");
+            Assert.assertEquals("King3", searchResult.pname);
+
+
+            List<DebugRowInfo> rows = table.listAllRowsWithDebug();
+            for (DebugRowInfo info: rows) {
+                if(!info.isDeleted())
+                    System.out.println(((Dog)info.object()).pname);
+            }
+
+        }catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void deleteAddIndexTest_bug() {
+        try (DB db = DBFactory.getSpecificDB(dbFileName)) {
+            // add a Dog entry to DB
+            Person p = new Person("John1",44, "Berlin", "www-404","This is a description");
+            db.beginTransaction();
+            db.add(p);
+            db.commit();
+
+            Person p2 = new Person("John2",44, "Berlin2", "www-404","This is a description");
+            db.beginTransaction();
+            db.add(p2);
+            db.commit();
+
+
+            Assert.assertEquals(db.getTotalRecordNumber(), 2);
+
+            //delete 1st
+            db.beginTransaction();
+            db.delete(1);
+            db.commit();
+
+            // check total record number
+            Assert.assertEquals(1, db.getTotalRecordNumber());
+
+            Person p3 = new Person("John3",44, "Berlin", "www-404","This is a description");
+            db.beginTransaction();
+            db.add(p3);
+            db.commit();
+
+            Assert.assertEquals(2, db.getTotalRecordNumber());
+
+            // try to search the elements
+            Person searchedPerson = db.search("John3");
+            Assert.assertNotNull(searchedPerson);
+            Assert.assertEquals("John3", searchedPerson.pname);
+
+            Person searchedPerson2 = db.search("John1");
+            Assert.assertNotNull(searchedPerson2);
+            Assert.assertEquals("John1", searchedPerson2.pname);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+    }
+
 }
