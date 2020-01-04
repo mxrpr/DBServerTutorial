@@ -13,27 +13,50 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Class is responsible to handle the basic file operations.
+ * Extends GenericBaseFileHandler operations with implementing the methods defined in  DBGeneric interface
+ *
+ * @see GenericBaseFileHandler
+ */
 class GenericFileHandler extends GenericBaseFileHandler {
 
-
+    /**
+     * Construct a new GenericFileHandler object
+     * @param dbFileName Name of the database file
+     * @param index Index object which has to be used during work
+     * @see GenericIndex
+     * @throws FileNotFoundException If the file cannot be opened, exception will be thrown
+     */
     public GenericFileHandler(final String dbFileName, final GenericIndex index) throws FileNotFoundException {
         super(dbFileName, index);
     }
 
+    /**
+     * Construct a new GenericFileHandler object
+     * @param randomAccessFile RandomAccessFile for the database
+     * @param dbFileName Name of the database file
+     * @param index Index object which has to be used during work
+     * @see RandomAccessFile
+     * @see GenericIndex
+     */
     public GenericFileHandler(final RandomAccessFile randomAccessFile,
                               final String dbFileName,
                               final GenericIndex index) {
         super(randomAccessFile, dbFileName, index);
     }
 
-
-//    public String runQuery(final String query) {
-//    	DBServer.LOGGER.info(String.format("[GenericFileHandler] Run query %s", query));
-//
-//    	DBServer.LOGGER.info("[GenericFileHandler] Running  query DONE");
-//    	return null;
-//    }
-//
+    /**
+     * Store object in the database
+     *
+     * @param object   Object to store
+     * @param defragOperation Is a defragment operation?
+     * @return OperationUnit
+     * @see OperationUnit
+     *
+     * @throws DuplicateNameException
+     * @throws DBException
+     */
     public OperationUnit add(final Object object, boolean defragOperation) throws DuplicateNameException, DBException {
 
 
@@ -50,18 +73,19 @@ class GenericFileHandler extends GenericBaseFileHandler {
             long currentPositionToInsert = this.dbFile.length();
             this.dbFile.seek(currentPositionToInsert);
 
-            // isTemporary byte
-            // isDeleted byte
-            // record length : int
-            // name length : int
-            // name
-            // address length : int
-            // address
-            // carplatenumber length
-            // carplatenum
-            // description length : int
-            // description
-
+            /** we have to store the following data in case of a row:
+                o isTemporary byte
+                o isDeleted byte
+                o record length : int
+                o name length : int
+                o name
+                o address length : int
+                o address
+                o carplatenumber length
+                o carplatenum
+                o description length : int
+                o description
+            **/
             int recordLength = 0;
             for (Field field : this.schema.fields) {
                 recordLength += getFieldLengthByType(field, object);
@@ -110,7 +134,14 @@ class GenericFileHandler extends GenericBaseFileHandler {
         }
     }
 
-
+    /**
+     * Read a given row
+     *
+     * @param rowNumber Number of row to read from table/db
+     * @return The object is filled with data from table/db
+     *
+     * @throws DBException
+     */
     public Object readRow(long rowNumber) throws DBException {
         DBServer.LOGGER.info("[GenericFileHandler] Read row: " + rowNumber);
         readLock.lock();
@@ -126,7 +157,7 @@ class GenericFileHandler extends GenericBaseFileHandler {
 
             DBServer.LOGGER.info("[GenericFileHandler] Read done");
 
-            return this.readFromByteStream(stream, this.zclass);
+            return this.readFromByteStream(stream, this.zClass);
         } catch (IOException ioe) {
             throw new DBException(ioe.getMessage());
         } finally {
@@ -134,7 +165,14 @@ class GenericFileHandler extends GenericBaseFileHandler {
         }
     }
 
-
+    /**
+     * Delete a given row
+     * @param rowNumber Number of row to delete
+     * @return OperationUnit
+     * @see OperationUnit
+     *
+     * @throws DBException
+     */
     public OperationUnit deleteRow(long rowNumber) throws DBException {
         DBServer.LOGGER.info("[GenericFileHandler] Delete row: " + rowNumber);
         writeLock.lock();
@@ -163,6 +201,17 @@ class GenericFileHandler extends GenericBaseFileHandler {
         }
     }
 
+    /**
+     * Update a given row
+     *
+     * @param rowNumber Number of row to update
+     * @param object The object which contains the information to store
+     * @return OperationUnit
+     * @see OperationUnit
+     *
+     * @throws DuplicateNameException
+     * @throws DBException
+     */
     public OperationUnit update(long rowNumber, final Object object) throws DuplicateNameException, DBException {
         DBServer.LOGGER.info("[GenericFileHandler] Update row: " + rowNumber);
         writeLock.lock();
@@ -198,6 +247,14 @@ class GenericFileHandler extends GenericBaseFileHandler {
         }
     }
 
+    /**
+     * Search row by name (the table must be is indexed, and the search is performed in the
+     * indexed value)
+     * @param name String to search
+     *
+     * @return  The found object. Can be null.
+     * @throws DBException
+     */
     public Object search(String name) throws DBException {
         DBServer.LOGGER.info("[GenericFileHandler] Search by name: " + name);
         long rowNumber = this.index.getRowNumberByIndex(name);
@@ -206,6 +263,14 @@ class GenericFileHandler extends GenericBaseFileHandler {
         return this.readRow(rowNumber);
     }
 
+    /**
+     * Search in table/db with Leveinshtein algorithm
+     *
+     * @param indexedFieldName Name of the field which was used for indexing
+     * @param tolerance  Tolerance of th algorithm
+     * @return List of found objects
+     * @throws DBException
+     */
     public List<Object> searchWithLeveinshtein(String indexedFieldName, int tolerance) throws DBException {
         List<Object> result = new ArrayList<>();
 
@@ -227,6 +292,13 @@ class GenericFileHandler extends GenericBaseFileHandler {
         return result;
     }
 
+    /**
+     * Search with regular expression. The search is performed in the index by the indexed field
+     *
+     * @param regexp The regular expression
+     * @return List of found objects.
+     * @throws DBException
+     */
     public List<Object> searchWithRegexp(String regexp) throws DBException {
         DBServer.LOGGER.info("[GenericFileHandler] Search with regexp");
         List<Object> result = new ArrayList<>();

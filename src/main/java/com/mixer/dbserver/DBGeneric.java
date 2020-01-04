@@ -7,6 +7,9 @@ import com.mixer.raw.general.Table;
 import java.io.Closeable;
 import java.io.IOException;
 
+/**
+ * Interface for a generic purpose database
+ */
 public interface DBGeneric extends Closeable {
 	
 	/**
@@ -14,14 +17,14 @@ public interface DBGeneric extends Closeable {
 	 * 
 	 * @param tableName Name of the table
 	 * @param schema Schema information in JSON
-	 * @param zclass Class of the stored object
+	 * @param zClass Class of the stored object
 	 * @return Table
 	 * 
 	 * @throws DBException In case of any error, the API throws DBException
 	 */
     Table useTable(final String tableName,
                    final String schema,
-                   final Class zclass) throws DBException;
+                   final Class<?> zClass) throws DBException;
 
     /**
      * Drop the currently used table
@@ -56,14 +59,14 @@ public interface DBGeneric extends Closeable {
      * Export given table to csv file
      * 
      * @param tableName Name of the table
-     * @param schema SChema in JSON format
-     * @param zclass Class of the stored object
+     * @param schema Schema in JSON format
+     * @param zClass Class of the stored object
      * 
      * @return String The generated string
      * 
      * @throws DBException  In case of any error, the API throws DBException
      */
-    String exportTableToCSV(final String tableName, final String schema, final Class zclass ) throws DBException;
+    String exportTableToCSV(final String tableName, final String schema, final Class<?> zClass ) throws DBException;
 
     /**
      * Export currrently used table to csv file

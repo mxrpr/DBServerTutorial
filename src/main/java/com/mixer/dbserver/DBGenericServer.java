@@ -69,13 +69,13 @@ public final class DBGenericServer implements DBGeneric {
 	}
 
 	@Override
-	public Table useTable(final String tableName, final String schema, final Class zclass) throws DBException {
+	public Table useTable(final String tableName, final String schema, final Class<?> zClass) throws DBException {
 
 		// if the table is already loaded, then use it
 		if (this.tablePool.containsKey(tableName)) {
 			this.currentlyUsedTable = this.tablePool.get(tableName);
 		} else {
-			Table _table = new MxrTable(tableName, schema, zclass, this.indexPool);
+			Table _table = new MxrTable(tableName, schema, zClass, this.indexPool);
 			this.tablePool.put(tableName, _table);
 			this.currentlyUsedTable = _table;
 		}
@@ -109,8 +109,8 @@ public final class DBGenericServer implements DBGeneric {
 	}
 
 	@Override
-	public String exportTableToCSV(final String tableName, final String schema, final Class zclass) throws DBException {
-		Table _table = this.useTable(tableName, schema, zclass);
+	public String exportTableToCSV(final String tableName, final String schema, final Class<?> zClass) throws DBException {
+		Table _table = this.useTable(tableName, schema, zClass);
 		List<Object> result = _table.searchWithRegexp(".*");
 		StringBuilder stringBuilder = new StringBuilder(600);
 		for (Object obj : result) {

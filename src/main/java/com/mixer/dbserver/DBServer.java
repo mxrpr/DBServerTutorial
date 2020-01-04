@@ -152,14 +152,15 @@ public final class DBServer implements DB {
     }
 
     @Override
-    public ITransaction beginTransaction() {
+    public void beginTransaction() {
         long threadID = Thread.currentThread().getId();
-        if (this.transactions.containsKey(threadID))
-            return this.transactions.get(threadID);
+        if (this.transactions.containsKey(threadID)) {
+            this.transactions.get(threadID);
+            return;
+        }
 
         ITransaction transaction = new Transaction();
         this.transactions.put(threadID, transaction);
-        return transaction;
     }
 
     @Override
