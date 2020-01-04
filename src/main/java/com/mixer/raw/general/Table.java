@@ -3,7 +3,6 @@ package com.mixer.raw.general;
 import com.mixer.exceptions.DBException;
 import com.mixer.exceptions.DuplicateNameException;
 import com.mixer.query.sql.ResultSet;
-import com.mixer.transaction.ITransaction;
 import com.mixer.util.DebugRowInfo;
 
 import java.io.IOException;
@@ -100,10 +99,9 @@ public interface Table {
 
     /**
      * Begin transaction
-     * 
-     * @return Returns a new Transaction object
+     *
      */
-    ITransaction beginTransaction();
+    void beginTransaction();
 
     /**
      * Commits the transaction associated with the thread

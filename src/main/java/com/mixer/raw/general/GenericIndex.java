@@ -20,7 +20,7 @@ public final class GenericIndex {
 	private long totalRowNumber = 0;
 
 	/**
-	 * Constructor needs the shema, because it contains information about the object fields,
+	 * Constructor needs the schema, because it contains information about the object fields,
 	 * indexed field. All these information is used to store/load data from/to database file
 	 *  
 	 * @param schema Scheme

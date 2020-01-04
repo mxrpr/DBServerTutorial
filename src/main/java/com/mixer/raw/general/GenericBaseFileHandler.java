@@ -14,12 +14,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * Class is responsible to handle the basic file operations, like read and write data into the file.
+ * This class knows the structure of the file - and can read different 'special' information like the db version for example.
+ */
 class GenericBaseFileHandler {
 
     RandomAccessFile dbFile;
     private final String dbFileName;
     Schema schema;
-    Class zclass;
+    Class<?> zClass;
     String indexByFieldName;
     final GenericIndex index;
 
@@ -27,8 +31,16 @@ class GenericBaseFileHandler {
     final Lock readLock = readWriteLock.readLock();
     final Lock writeLock = readWriteLock.writeLock();
     private final static int HEADER_INFO_SPACE = 100;
+    final String VERSION = "0.1";
 
 
+    /**
+     * Constructor
+     *
+     * @param dbFileName Name of the database file
+     * @param index Reference to a GenericIndex object
+     * @throws FileNotFoundException
+     */
     GenericBaseFileHandler(final String dbFileName,
                            final GenericIndex index) throws FileNotFoundException {
         this.index = index;
@@ -36,6 +48,13 @@ class GenericBaseFileHandler {
         this.dbFile = new RandomAccessFile(dbFileName, "rw");
     }
 
+    /**
+     * Constructor
+     *
+     * @param  randomAccessFile Reference to a RandomAccessFile object
+     * @param dbFileName Name of the database file
+     * @param index Reference to a GenericIndex object
+     */
     GenericBaseFileHandler(final RandomAccessFile randomAccessFile,
                            final String dbFileName,
                            final GenericIndex index) {
@@ -55,6 +74,14 @@ class GenericBaseFileHandler {
         DBServer.LOGGER.info("[GenericBaseFileHandler] Initialisation done");
     }
 
+    /**
+     * Set schema of the table
+     *
+     * @param schema Schema object
+     * @see Schema
+     *
+     * @throws DBException
+     */
     public void setSchema(final Schema schema) throws DBException {
         DBServer.LOGGER.info("[GenericBaseFileHandler] Set schema");
         this.schema = schema;
@@ -67,12 +94,17 @@ class GenericBaseFileHandler {
         DBServer.LOGGER.info("[GenericBaseFileHandler] Set schema, done");
     }
 
-    public void setZClass(final Class zclass) {
-        this.zclass = zclass;
+    public void setZClass(final Class<?> zClass) {
+        this.zClass = zClass;
     }
 
-
-    public void loadAllDataToIndex(final Class zclass) throws DBException {
+    /**
+     * Loads all data from the database to Index
+     *
+     * @param zClass Class of the strored object
+     * @throws DBException
+     */
+    public void loadAllDataToIndex(final Class<?> zClass) throws DBException {
         DBServer.LOGGER.info("[GenericBaseFileHandler] Loading index data");
         long currentPos = HEADER_INFO_SPACE;
         long rowNum = 0;
@@ -107,7 +139,7 @@ class GenericBaseFileHandler {
                         byte[] b = new byte[recordLength];
                         this.dbFile.read(b);
                         Object object = this.readFromByteStream(new DataInputStream(new ByteArrayInputStream(b)),
-                                zclass);
+                                zClass);
 
                         String _name = (String) object.getClass().getDeclaredField(this.schema.indexBy).get(object);
                         this.index.addIndexedValue(_name, rowNum);
@@ -131,10 +163,10 @@ class GenericBaseFileHandler {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    Object readFromByteStream(final DataInputStream stream, final Class zclass) throws IOException {
+    Object readFromByteStream(final DataInputStream stream, final Class<?> zClass) throws IOException {
         Object result;
         try {
-            result = Class.forName(zclass.getCanonicalName()).getDeclaredConstructor(new Class[]{}).newInstance();
+            result = Class.forName(zClass.getCanonicalName()).getDeclaredConstructor(new Class[]{}).newInstance();
 
             for (Field field : this.schema.fields) {
                 if (field.fieldType.equalsIgnoreCase("String")) {
@@ -159,6 +191,13 @@ class GenericBaseFileHandler {
         return result;
     }
 
+    /**
+     * Reads the raw record from the file from the given file position.
+     *
+     * @param bytePositionOfRow byte position of the given row in database/table
+     * @return byte array
+     * @throws IOException
+     */
     byte[] readRawRecord(long bytePositionOfRow) throws IOException {
         DBServer.LOGGER.info("[GenericBaseFileHandler] Read raw record, position: " + bytePositionOfRow);
         readLock.lock();
@@ -193,8 +232,14 @@ class GenericBaseFileHandler {
         this.dbFile.close();
     }
 
-
-    public List<DebugRowInfo> loadAllDataFromFile(final Class zclass) throws IOException {
+    /**
+     * Only for debugging purpose. We can read the records from the table with all useful information
+     * @see DebugRowInfo
+     * @param zClass Class of the stored object
+     * @return List of DebugRowInfo objects
+     * @throws IOException
+     */
+    public List<DebugRowInfo> loadAllDataFromFile(final Class<?> zClass) throws IOException {
         readLock.lock();
         try {
 
@@ -220,7 +265,7 @@ class GenericBaseFileHandler {
 
                     byte[] b = new byte[recordLength];
                     this.dbFile.read(b);
-                    Object p = this.readFromByteStream(new DataInputStream(new ByteArrayInputStream(b)), zclass);
+                    Object p = this.readFromByteStream(new DataInputStream(new ByteArrayInputStream(b)), zClass);
                     result.add(new DebugRowInfo(p, isDeleted, isTemporary));
                     currentPosition += recordLength;
                 }
@@ -232,6 +277,11 @@ class GenericBaseFileHandler {
         }
     }
 
+    /**
+     * Delete database file. Name of the db file is stored in the dbFileName variable.
+     * @return true if successful
+     * @throws IOException
+     */
     public boolean deleteFile() throws IOException {
         writeLock.lock();
         try {
@@ -248,10 +298,21 @@ class GenericBaseFileHandler {
         }
     }
 
+    /**
+     * Get table name
+     * @return String
+     */
     public String getTableName() {
         return this.dbFileName;
     }
 
+    /**
+     * Commit operations on the database/table
+     *
+     * @param newRows list of new rows inserted
+     * @param deletedRows list of deleted rows
+     * @throws DBException
+     */
     public void commit(List<Long> newRows, List<Long> deletedRows) throws DBException {
         DBServer.LOGGER.info("[GenericBaseFileHandler] Commit");
         writeLock.lock();
@@ -261,7 +322,7 @@ class GenericBaseFileHandler {
                 this.dbFile.writeBoolean(false); // it is not temporary
                 // re-read the record
                 byte[] b = this.readRawRecord(position);
-                Object object = this.readFromByteStream(new DataInputStream(new ByteArrayInputStream(b)), this.zclass);
+                Object object = this.readFromByteStream(new DataInputStream(new ByteArrayInputStream(b)), this.zClass);
 
                 // add it to the index
 
@@ -284,6 +345,13 @@ class GenericBaseFileHandler {
         }
     }
 
+    /**
+     * Rolling back operations on the database/table
+     *
+     * @param newRows list of new rows inserted
+     * @param deletedRows list of deleted rows
+     * @throws DBException
+     */
     public void rollback(List<Long> newRows, List<Long> deletedRows) throws DBException {
         DBServer.LOGGER.info("[GenericBaseFileHandler] Rollback");
         writeLock.lock();
@@ -309,7 +377,7 @@ class GenericBaseFileHandler {
                 this.dbFile.writeBoolean(false);
                 // re-read the record
                 byte[] b = this.readRawRecord(position);
-                Object object = this.readFromByteStream(new DataInputStream(new ByteArrayInputStream(b)), this.zclass);
+                Object object = this.readFromByteStream(new DataInputStream(new ByteArrayInputStream(b)), this.zClass);
 
 
                 // add it to the index
@@ -326,16 +394,25 @@ class GenericBaseFileHandler {
         }
     }
 
+    /**
+     * Set the table version
+     *
+     * @throws IOException
+     */
     private void setTableVersion() throws IOException {
         DBServer.LOGGER.info("[GenericBaseFileHandler] set DB version");
         this.dbFile.seek(0);
-        String VERSION = "0.1";
         this.dbFile.write(VERSION.getBytes(StandardCharsets.UTF_8));
         char[] chars = new char[HEADER_INFO_SPACE - VERSION.length()];
         Arrays.fill(chars, ' ');
         this.dbFile.write(new String(chars).getBytes());
     }
 
+    /**
+     * Get table version
+     * @return
+     * @throws IOException
+     */
     public String getTableVersion() throws IOException {
         readLock.lock();
         try {
@@ -349,6 +426,17 @@ class GenericBaseFileHandler {
         }
     }
 
+    /**
+     * Depending on field type, the field can have different length. This method
+     * return the field length by its type
+     *
+     * @param field Field object
+     * @param object Reference to the object which we would like to store in db/table
+     * @return Length of the field
+     * @see Field
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     */
     int getFieldLengthByType(Field field, Object object) throws NoSuchFieldException, IllegalAccessException {
         int result = 0;
 

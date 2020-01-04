@@ -30,7 +30,7 @@ public class FileHandler extends BaseFileHandler {
         writeLock.lock();
         try {
 
-            if (Index.getInstance().hasNameinIndex(name)) {
+            if (Index.getInstance().hasNameInIndex(name)) {
                 throw new DuplicateNameException(String.format("Name '%s' already exists!", name));
             }
 

@@ -35,7 +35,7 @@ public class MxrTable implements Table {
     private GenericFileHandler fileHandler;
     private Map<Long, ITransaction> transactions;
     private Schema schema;
-    private Class zclass;
+    private Class<?> zClass;
     private GenericIndex index;
 
 
@@ -44,22 +44,22 @@ public class MxrTable implements Table {
      * 
      * @param dbFileName Name of the database file
      * @param schema	Schema of the object to be stored.Schema contains the object's field related information
-     * @param zclass	Class of the stored object
+     * @param zClass	Class of the stored object
      * @param indexPool	Reference to the used Index component
      * @throws DBException In case of error, DBException will be thrown
      */
     public MxrTable(final String dbFileName,
                     final String schema,
-                    final Class zclass,
+                    final Class<?> zClass,
                     final GenericIndexPool indexPool) throws DBException {
         try {
             this.schema = this.readSchema(schema);
-            this.zclass = zclass;
+            this.zClass = zClass;
             this.index = indexPool.createIndex(dbFileName, this.schema);
 
             this.fileHandler = new GenericFileHandler(dbFileName, this.index);
             this.fileHandler.setSchema(this.schema);
-            this.fileHandler.setZClass(this.zclass);
+            this.fileHandler.setZClass(this.zClass);
 
             this.transactions = new LinkedHashMap<>();
             this.initialise();
@@ -81,7 +81,7 @@ public class MxrTable implements Table {
         } catch (IOException ioe) {
             throw new DBException(ioe.getMessage());
         }
-        this.fileHandler.loadAllDataToIndex(this.zclass);
+        this.fileHandler.loadAllDataToIndex(this.zClass);
     }
 
     /**
@@ -195,14 +195,15 @@ public class MxrTable implements Table {
     }
 
     @Override
-    public ITransaction beginTransaction() {
+    public void beginTransaction() {
         long threadID = Thread.currentThread().getId();
-        if (this.transactions.containsKey(threadID))
-            return this.transactions.get(threadID);
+        if (this.transactions.containsKey(threadID)) {
+            this.transactions.get(threadID);
+            return;
+        }
 
         ITransaction transaction = new Transaction();
         this.transactions.put(threadID, transaction);
-        return transaction;
     }
 
     @Override
@@ -233,7 +234,7 @@ public class MxrTable implements Table {
 
     public List<DebugRowInfo> listAllRowsWithDebug() throws DBException {
         try {
-            return this.fileHandler.loadAllDataFromFile(this.zclass);
+            return this.fileHandler.loadAllDataFromFile(this.zClass);
         } catch (IOException ioe) {
             throw new DBException(ioe.getMessage());
         }
@@ -249,9 +250,9 @@ public class MxrTable implements Table {
         GenericFileHandler defragFH = new GenericFileHandler(new RandomAccessFile(tmpFile, "rw"), tmpFile.getName(),
                 this.index);
         defragFH.setSchema(this.schema);
-        defragFH.setZClass(this.zclass);
+        defragFH.setZClass(this.zClass);
         defragFH.initialise();
-        List<DebugRowInfo> debugRowInfos = this.fileHandler.loadAllDataFromFile(this.zclass);
+        List<DebugRowInfo> debugRowInfos = this.fileHandler.loadAllDataFromFile(this.zClass);
         for (DebugRowInfo dri : debugRowInfos) {
             if (dri.isDeleted() || dri.isTemporary()) {
                 continue;
@@ -279,7 +280,7 @@ public class MxrTable implements Table {
         defragFH.close();
         this.fileHandler = new GenericFileHandler(oldDatabaseName, this.index);
         this.fileHandler.setSchema(this.schema);
-        this.fileHandler.setZClass(this.zclass);
+        this.fileHandler.setZClass(this.zClass);
 
 
         this.index.clear();

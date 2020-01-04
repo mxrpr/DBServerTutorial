@@ -14,8 +14,7 @@ import java.util.concurrent.Executors;
 @SuppressWarnings({"InfiniteLoopStatement", "unused", "UnnecessaryCallToStringValueOf"})
 final class RESTTestApp {
 
-    @SuppressWarnings("CharsetObjectCanBeUsed")
-    private class ParameterBuilder {
+    private static class ParameterBuilder {
         String getStringParameters(Map<String, String> parameters) throws UnsupportedEncodingException {
             StringBuilder sb = new StringBuilder(500);
             for (Map.Entry<String, String> entry : parameters.entrySet()) {
@@ -50,9 +49,7 @@ final class RESTTestApp {
                 try {
                     performSearchTest();
                     Thread.sleep(500);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -63,9 +60,7 @@ final class RESTTestApp {
                 try {
                     listAllRecors();
                     Thread.sleep(500);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -76,9 +71,7 @@ final class RESTTestApp {
                 try {
                     addPerson();
                     Thread.sleep(500);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }

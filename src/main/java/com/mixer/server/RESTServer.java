@@ -9,7 +9,7 @@ final class RESTServer {
 
     private RESTServer() {
         app = Javalin.create().port(7001);
-        app.event(JavalinEvent.SERVER_STOPPING, () -> DBController.shutdown());
+        app.event(JavalinEvent.SERVER_STOPPING, DBController::shutdown);
     }
 
     private void doJob() {
