@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 //    id 'jacoco'
 //    id 'pmd'
 //    id 'findbugs'
@@ -7,6 +8,10 @@ plugins {
 
 group 'com.mixer'
 version '1.0-SNAPSHOT'
+
+application {
+    mainClass = 'com.mixer.testapp.TestApp'
+}
 
 //pmd {
 //  toolVersion = '4.3'
