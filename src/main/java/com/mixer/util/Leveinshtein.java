@@ -18,9 +18,9 @@ public final class Leveinshtein {
         IntStream.range(0, rhs.length()).forEach(i-> result[0][i] = i);
 
         int subst;
-        for (int j=1;j<rhs.length(); j++) {
-            for(int i=1;i< lhs.length();i++) {
-                if (lhs.charAt(i) == rhs.charAt(j))
+        for (int j=1; j < rhs.length(); j++) {
+            for(int i=1; i < lhs.length(); i++) {
+                if (lhs.charAt(i-1) == rhs.charAt(j-1))
                     subst = 0;
                 else
                     subst = 1;
