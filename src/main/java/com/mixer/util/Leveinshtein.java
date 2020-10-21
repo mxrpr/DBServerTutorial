@@ -5,6 +5,7 @@ import java.util.stream.IntStream;
 public final class Leveinshtein {
 
     public static int leveinshteinDistance(final String lhs, final String rhs) {
+        if (lhs == null || rhs == null ) return -1;
         if (lhs.equalsIgnoreCase(rhs)) return 0;
         if (lhs.isEmpty()) return rhs.length();
         if (rhs.isEmpty()) return lhs.length();
